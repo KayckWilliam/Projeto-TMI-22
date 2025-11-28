@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Endereços Cadastrados</title>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="container mx-auto p-8 max-w-4xl">
+
+  <h1 class="text-3xl font-bold mb-8 text-center">Endereços Cadastrados</h1>
+
+  <!-- LISTA DE ENDEREÇOS -->
+  <div id="listaEnderecos" class="space-y-4">
+    <!-- Conteúdo preenchido via JS -->
+    <p class="text-center text-gray-500">Carregando endereços...</p>
+  </div>
+
+  <!-- BOTÃO VOLTAR -->
+  <div class="text-center mt-10">
+    <a href="index.html"
+       class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
+      Voltar
+    </a>
+  </div>
+
+</div>
+
+<script src="/js/api.js"></script>
+
+<script>
+async function carregarEnderecos() {
+
+  // Buscar todos os endereços
+  const res = await fetch(API.enderecos);
+  const enderecos = await res.json();
+
+  const container = document.getElementById("listaEnderecos");
+  container.innerHTML = "";
+
+  if (enderecos.length === 0) {
+    container.innerHTML = `
+      <p class="text-center text-gray-600">Nenhum endereço cadastrado.</p>
+    `;
+    return;
+  }
+
+  enderecos.forEach(e => {
+    container.innerHTML += `
+      <div class="bg-white shadow p-6 rounded-xl">
+
+        <h2 class="text-xl font-semibold mb-2 text-blue-700">
+          Endereço ID: ${e.id}
+        </h2>
+
+        <p><strong>CEP:</strong> ${e.cep}</p>
+        <p><strong>Rua:</strong> ${e.rua}</p>
+        <p><strong>Número:</strong> ${e.numero}</p>
+        <p><strong>Bairro:</strong> ${e.bairro}</p>
+        <p><strong>Cidade:</strong> ${e.cidade}</p>
+        <p><strong>Estado:</strong> ${e.estado}</p>
+
+      </div>
+    `;
+  });
+}
+
+carregarEnderecos();
+</script>
+
+</body>
+</html>

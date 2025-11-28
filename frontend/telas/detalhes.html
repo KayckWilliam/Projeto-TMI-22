@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Detalhes do Cadastro</title>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="container mx-auto p-8 max-w-3xl">
+
+  <!-- TITULO -->
+  <h1 class="text-3xl font-bold mb-8 text-center">Detalhes do Cadastro</h1>
+
+  <!-- CARD PRINCIPAL -->
+  <div id="conteudo"
+       class="bg-white shadow p-8 rounded-xl space-y-6 text-lg">
+    <!-- Dados preenchidos via JS -->
+    <p class="text-center text-gray-500">Carregando dados...</p>
+  </div>
+
+  <!-- BOTÃO VOLTAR -->
+  <div class="text-center mt-10">
+    <a href="relatorios.html"
+       class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400
+              transition text-lg font-medium">
+      Voltar
+    </a>
+  </div>
+
+</div>
+
+<script src="/js/api.js"></script>
+
+<script>
+async function carregarDetalhes() {
+
+  // Ler parâmetros: id e type
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  const tipo = params.get("type");
+
+  const container = document.getElementById("conteudo");
+
+  if (!id || !tipo) {
+    container.innerHTML = "<p class='text-red-600 text-center'>Parâmetros inválidos.</p>";
+    return;
+  }
+
+  let url = "";
+  let titulo = "";
+
+  // Seleciona a API correta
+  if (tipo === "crianca") {
+    url = `${API.criancas}/${id}`;
+    titulo = "Criança";
+  }
+  else if (tipo === "responsavel") {
+    url = `${API.responsaveis}/${id}`;
+    titulo = "Responsável";
+  }
+  else if (tipo === "denunciante") {
+    url = `${API.denunciantes}/${id}`;
+    titulo = "Denunciante";
+  }
+
+  // Buscar dados da API
+  const dados = await fetch(url).then(r => r.json());
+
+  // Montar HTML dinamicamente
+  container.innerHTML = `
+    <h2 class="text-2xl font-bold text-blue-700 border-b pb-2">${titulo}</h2>
+
+    <div class="space-y-3">
+
+      <p><strong>ID:</strong> ${dados.id}</p>
+
+      <p><strong>Nome:</strong> ${dados.nome}</p>
+
+      ${dados.data_nascimento ? `<p><strong>Data de nascimento:</strong> ${dados.data_nascimento}</p>` : ""}
+
+      ${dados.cpf ? `<p><strong>CPF:</strong> ${dados.cpf}</p>` : ""}
+
+      ${dados.rg ? `<p><strong>RG:</strong> ${dados.rg}</p>` : ""}
+
+      ${dados.parentesco ? `<p><strong>Parentesco:</strong> ${dados.parentesco}</p>` : ""}
+
+      ${dados.telefone ? `<p><strong>Telefone:</strong> ${dados.telefone}</p>` : ""}
+
+      ${dados.email ? `<p><strong>E-mail:</strong> ${dados.email}</p>` : ""}
+
+      ${dados.crianca_id ? `<p><strong>ID da criança vinculada:</strong> ${dados.crianca_id}</p>` : ""}
+
+      <h3 class="text-xl font-semibold pt-4 border-t">Endereço</h3>
+
+      ${dados.cep ? `<p><strong>CEP:</strong> ${dados.cep}</p>` : ""}
+      ${dados.rua ? `<p><strong>Rua:</strong> ${dados.rua}</p>` : ""}
+      ${dados.numero ? `<p><strong>Número:</strong> ${dados.numero}</p>` : ""}
+      ${dados.bairro ? `<p><strong>Bairro:</strong> ${dados.bairro}</p>` : ""}
+      ${dados.cidade ? `<p><strong>Cidade:</strong> ${dados.cidade}</p>` : ""}
+      ${dados.estado ? `<p><strong>Estado:</strong> ${dados.estado}</p>` : ""}
+
+      ${dados.criado_em ? `
+        <h3 class="text-xl font-semibold pt-4 border-t">Informações do Sistema</h3>
+        <p><strong>Criado em:</strong> ${new Date(dados.criado_em).toLocaleString()}</p>
+      ` : ""}
+
+    </div>
+  `;
+}
+
+carregarDetalhes();
+</script>
+
+</body>
+</html>

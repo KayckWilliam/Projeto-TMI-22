@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Relatórios</title>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="container mx-auto p-8">
+
+  <h1 class="text-3xl font-bold mb-8 text-center">Relatórios de Cadastros</h1>
+
+  <!-- ===================== -->
+  <!-- LISTA DE CRIANÇAS -->
+  <!-- ===================== -->
+  <section class="mb-10">
+    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Crianças Cadastradas</h2>
+    <ul id="listaCriancas" class="bg-white shadow rounded p-4 space-y-2">
+      <!-- preenchido via JS -->
+    </ul>
+  </section>
+
+  <!-- ===================== -->
+  <!-- LISTA DE RESPONSÁVEIS -->
+  <!-- ===================== -->
+  <section class="mb-10">
+    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Responsáveis Cadastrados</h2>
+    <ul id="listaResponsaveis" class="bg-white shadow rounded p-4 space-y-2">
+      <!-- preenchido via JS -->
+    </ul>
+  </section>
+
+  <!-- ===================== -->
+  <!-- LISTA DE DENUNCIANTES -->
+  <!-- ===================== -->
+  <section class="mb-10">
+    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Denunciantes Cadastrados</h2>
+    <ul id="listaDenunciantes" class="bg-white shadow rounded p-4 space-y-2">
+      <!-- preenchido via JS -->
+    </ul>
+  </section>
+
+  <!-- BOTÃO VOLTAR -->
+  <div class="text-center">
+    <a href="index.html"
+       class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
+       Voltar
+    </a>
+  </div>
+
+</div>
+
+<script src="/js/api.js"></script>
+
+<script>
+async function carregarRelatorios() {
+
+  // Carregar crianças
+  const criancas = await fetch(API.criancas).then(r => r.json());
+  const ulCriancas = document.getElementById("listaCriancas");
+  ulCriancas.innerHTML = "";
+
+  criancas.forEach(c => {
+    ulCriancas.innerHTML += `
+      <li>
+        <a href="detalhes.html?id=${c.id}&type=crianca"
+           class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
+           ${c.nome}
+        </a>
+      </li>
+    `;
+  });
+
+  // Carregar responsáveis
+  const responsaveis = await fetch(API.responsaveis).then(r => r.json());
+  const ulResp = document.getElementById("listaResponsaveis");
+  ulResp.innerHTML = "";
+
+  responsaveis.forEach(r => {
+    ulResp.innerHTML += `
+      <li>
+        <a href="detalhes.html?id=${r.id}&type=responsavel"
+           class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
+           ${r.nome}
+        </a>
+      </li>
+    `;
+  });
+
+  // Carregar denunciantes
+  const denunciantes = await fetch(API.denunciantes).then(r => r.json());
+  const ulDen = document.getElementById("listaDenunciantes");
+  ulDen.innerHTML = "";
+
+  denunciantes.forEach(d => {
+    ulDen.innerHTML += `
+      <li>
+        <a href="detalhes.html?id=${d.id}&type=denunciante"
+           class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
+           ${d.nome}
+        </a>
+      </li>
+    `;
+  });
+}
+
+carregarRelatorios();
+</script>
+
+</body>
+</html>
