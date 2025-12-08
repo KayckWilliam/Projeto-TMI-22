@@ -146,17 +146,26 @@
 
 </div>
 
+<!-- ============================= -->
+<!-- JS — ID SEQUENCIAL -->
+<!-- ============================= -->
 <script>
-  // Gerar ID automático
-  function gerarId() {
-    return Math.floor(100000 + Math.random() * 900000);
+  function gerarIdSequencial() {
+    // Busca lista salva
+    let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
+
+    // ID = quantidade de itens + 1
+    return lista.length + 1;
   }
-  document.getElementById("idGerado").innerText = gerarId();
+
+  // Insere no HTML
+  document.getElementById("idGerado").innerText = gerarIdSequencial();
 </script>
 
 <script src="/js/responsaveis.js"></script>
 
 </body>
 </html>
+
 
 

@@ -56,16 +56,18 @@
 
 <script src="/js/criancas.js"></script>
 
+<!-- ID SEQUENCIAL -->
 <script>
-  // Função para gerar ID aleatório local
-  function gerarId() {
-    return Math.floor(100000 + Math.random() * 900000); 
+  function gerarIdSequencial() {
+    let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
+    return lista.length + 1;
   }
 
-  // Inserir ID já ao carregar a página
-  document.getElementById("idGerado").innerText = gerarId();
+  document.getElementById("idGerado").innerText = gerarIdSequencial();
 </script>
 
 </body>
 </html>
+
+
 
