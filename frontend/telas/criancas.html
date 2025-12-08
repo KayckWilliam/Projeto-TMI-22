@@ -31,11 +31,18 @@
     <label class="block mb-2">Data de nascimento</label>
     <input type="date" name="data_nascimento" required class="w-full p-2 border rounded mb-4" />
 
-    <!-- Botão -->
-    <button type="submit"
-      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-      Salvar
-    </button>
+    <!-- Botões -->
+    <div class="flex gap-4 mt-4">
+      <button type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Salvar
+      </button>
+
+      <button id="btnSalvarContinuar" type="button"
+        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Salvar e continuar
+      </button>
+    </div>
 
   </form>
 
@@ -54,20 +61,79 @@
 
 </div>
 
-<script src="/js/criancas.js"></script>
-
-<!-- ID SEQUENCIAL -->
+<!-- SCRIPT PRINCIPAL -->
 <script>
+  // --- GERAÇÃO DE ID AUTOMÁTICO ---
   function gerarIdSequencial() {
     let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
     return lista.length + 1;
   }
 
   document.getElementById("idGerado").innerText = gerarIdSequencial();
+
+  // --- SALVAR CRIANÇA NO LOCALSTORAGE ---
+  function salvarCriancaLocal() {
+    const nome = document.querySelector("input[name='nome']").value;
+    const data = document.querySelector("input[name='data_nascimento']").value;
+
+    let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
+
+    const novaCrianca = {
+      id: lista.length + 1,
+      nome: nome,
+      data_nascimento: data
+    };
+
+    lista.push(novaCrianca);
+    localStorage.setItem("criancas", JSON.stringify(lista));
+  }
+
+  // --- BOTÃO SALVAR NORMAL ---
+  document.getElementById("formCrianca").addEventListener("submit", (e) => {
+    e.preventDefault();
+    salvarCriancaLocal();
+    location.reload(); // Atualiza a tela
+  });
+
+  // --- BOTÃO SALVAR E CONTINUAR ---
+  document.getElementById("btnSalvarContinuar").addEventListener("click", () => {
+    salvarCriancaLocal();
+    window.location.href = "responsaveis.html";
+  });
+
+  // --- CARREGAR LISTA DE CRIANÇAS ---
+  function carregarLista() {
+    const lista = JSON.parse(localStorage.getItem("criancas") || "[]");
+    const tbody = document.getElementById("listaCriancas");
+
+    tbody.innerHTML = "";
+
+    lista.forEach(c => {
+      tbody.innerHTML += `
+        <tr class="border-b">
+          <td class="p-2 text-center">${c.id}</td>
+          <td class="p-2 text-center">${c.nome}</td>
+          <td class="p-2 text-center">
+            <button class="text-red-600 hover:underline" onclick="removerCrianca(${c.id})">
+              Remover
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  // --- REMOVER CRIANÇA ---
+  function removerCrianca(id) {
+    let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
+    lista = lista.filter(c => c.id !== id);
+
+    localStorage.setItem("criancas", JSON.stringify(lista));
+    location.reload();
+  }
+
+  carregarLista();
 </script>
 
 </body>
 </html>
-
-
-

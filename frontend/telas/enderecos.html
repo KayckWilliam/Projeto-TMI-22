@@ -3,23 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <script src="https://cdn.tailwindcss.com"></script>
-  <title>Endereços Cadastrados</title>
+  <title>Cadastrar Endereço</title>
 </head>
 
 <body class="bg-gray-100">
 
-<div class="container mx-auto p-8 max-w-4xl">
+<div class="container mx-auto p-8 max-w-2xl">
 
-  <h1 class="text-3xl font-bold mb-8 text-center">Endereços Cadastrados</h1>
+  <h1 class="text-3xl font-bold mb-8 text-center">Cadastrar Endereço</h1>
 
-  <!-- LISTA DE ENDEREÇOS -->
-  <div id="listaEnderecos" class="space-y-4">
-    <!-- Conteúdo preenchido via JS -->
-    <p class="text-center text-gray-500">Carregando endereços...</p>
-  </div>
+  <!-- FORMULÁRIO -->
+  <form id="formEndereco" class="bg-white shadow p-6 rounded-xl space-y-4">
+
+    <div>
+      <label class="font-medium">CEP:</label>
+      <input type="text" id="cep" class="w-full p-2 border rounded">
+    </div>
+
+    <div>
+      <label class="font-medium">Rua:</label>
+      <input type="text" id="rua" class="w-full p-2 border rounded">
+    </div>
+
+    <div>
+      <label class="font-medium">Número:</label>
+      <input type="text" id="numero" class="w-full p-2 border rounded">
+    </div>
+
+    <div>
+      <label class="font-medium">Bairro:</label>
+      <input type="text" id="bairro" class="w-full p-2 border rounded">
+    </div>
+
+    <div>
+      <label class="font-medium">Cidade:</label>
+      <input type="text" id="cidade" class="w-full p-2 border rounded">
+    </div>
+
+    <div>
+      <label class="font-medium">Estado:</label>
+      <input type="text" id="estado" class="w-full p-2 border rounded">
+    </div>
+
+    <!-- BOTÕES -->
+    <div class="flex gap-4 pt-4">
+
+      <!-- BOTÃO SALVAR (salva + avança) -->
+      <button type="submit"
+        class="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
+        Salvar Endereço
+      </button>
+
+      <!-- BOTÃO IR DIRETO PARA CRIANÇAS (NÃO SALVA) -->
+      <button type="button" id="btnIrCriancas"
+        class="w-full py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition">
+        Ir para Crianças
+      </button>
+
+    </div>
+
+  </form>
 
   <!-- BOTÃO VOLTAR -->
-  <div class="text-center mt-10">
+  <div class="text-center mt-8">
     <a href="index.html"
        class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
       Voltar
@@ -31,43 +77,34 @@
 <script src="/js/api.js"></script>
 
 <script>
-async function carregarEnderecos() {
+// ENVIO NORMAL DO FORMULÁRIO
+document.getElementById("formEndereco").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  // Buscar todos os endereços
-  const res = await fetch(API.enderecos);
-  const enderecos = await res.json();
+  const endereco = {
+    cep: document.getElementById("cep").value,
+    rua: document.getElementById("rua").value,
+    numero: document.getElementById("numero").value,
+    bairro: document.getElementById("bairro").value,
+    cidade: document.getElementById("cidade").value,
+    estado: document.getElementById("estado").value,
+  };
 
-  const container = document.getElementById("listaEnderecos");
-  container.innerHTML = "";
-
-  if (enderecos.length === 0) {
-    container.innerHTML = `
-      <p class="text-center text-gray-600">Nenhum endereço cadastrado.</p>
-    `;
-    return;
-  }
-
-  enderecos.forEach(e => {
-    container.innerHTML += `
-      <div class="bg-white shadow p-6 rounded-xl">
-
-        <h2 class="text-xl font-semibold mb-2 text-blue-700">
-          Endereço ID: ${e.id}
-        </h2>
-
-        <p><strong>CEP:</strong> ${e.cep}</p>
-        <p><strong>Rua:</strong> ${e.rua}</p>
-        <p><strong>Número:</strong> ${e.numero}</p>
-        <p><strong>Bairro:</strong> ${e.bairro}</p>
-        <p><strong>Cidade:</strong> ${e.cidade}</p>
-        <p><strong>Estado:</strong> ${e.estado}</p>
-
-      </div>
-    `;
+  // Envia sem validar
+  fetch(API.enderecos, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(endereco)
   });
-}
 
-carregarEnderecos();
+  // Redireciona
+  window.location.href = "criancas.html";
+});
+
+// IR DIRETO PARA A PÁGINA CRIANÇAS (NÃO SALVA)
+document.getElementById("btnIrCriancas").addEventListener("click", () => {
+  window.location.href = "criancas.html";
+});
 </script>
 
 </body>
