@@ -36,42 +36,96 @@
         Relatórios
       </a>
 
-      <!-- BOTÃO LISTA → só Admin vê -->
+      <!-- BOTÃO LISTA → ADMIN apenas -->
       <a id="btnLista" href="lista.html"
         class="hidden w-full text-center p-6 bg-white shadow rounded-xl 
                hover:bg-purple-50 transition text-xl font-semibold">
         Lista (Admin)
       </a>
 
+      <!-- BOTÃO USERS → ADMIN apenas -->
+      <a id="btnUsers" href="users.html"
+        class="hidden w-full text-center p-6 bg-white shadow rounded-xl 
+               hover:bg-yellow-50 transition text-xl font-semibold">
+        Usuários (Admin)
+      </a>
+
     </div>
 
   </div>
 
-  <!-- SCRIPT DE LOGIN / LOGOUT -->
+  <!-- MODAL DE LOGIN -->
+  <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white p-8 rounded-lg w-96 shadow-xl">
+
+      <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
+
+      <label class="font-medium">Usuário</label>
+      <input id="loginUser" class="w-full p-2 border rounded mb-4">
+
+      <label class="font-medium">Senha</label>
+      <input id="loginPass" type="password" class="w-full p-2 border rounded mb-6">
+
+      <div class="flex justify-between">
+        <button onclick="fazerLogin()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Entrar
+        </button>
+
+        <button onclick="fecharLogin()"
+          class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCRIPT DE LOGIN / USUÁRIOS -->
   <script>
+    // ----------------------------------------
+    // 1) Criar usuário padrão se não existir
+    // ----------------------------------------
+    function inicializarUsuarios() {
+      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+      if (!usuarios.some(u => u.user === "helmer")) {
+        usuarios.push({
+          user: "helmer",
+          senha: "123456",
+          nivel: "admin"
+        });
+        localStorage.setItem("usuarios", JSON.stringify(usuarios));
+      }
+    }
+    inicializarUsuarios();
+
+    // ----------------------------------------
+    // 2) Atualizar interface
+    // ----------------------------------------
     function atualizarTela() {
       const loginArea = document.getElementById("loginArea");
       const btnLista = document.getElementById("btnLista");
+      const btnUsers = document.getElementById("btnUsers");
 
       const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
 
       if (!usuario) {
-        // Usuário deslogado
         loginArea.innerHTML = `
-          <button onclick="mostrarTelaLogin()" 
+          <button onclick="abrirLogin()" 
             class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
             Login
           </button>
         `;
         btnLista.classList.add("hidden");
+        btnUsers.classList.add("hidden");
         return;
       }
 
-      // Usuário logado
       loginArea.innerHTML = `
         <div class="flex items-center gap-3">
           <span class="text-gray-700 font-medium">
-            Olá, ${usuario.nome} (${usuario.nivel})
+            Olá, ${usuario.user} (${usuario.nivel})
           </span>
 
           <button onclick="logout()" 
@@ -81,30 +135,44 @@
         </div>
       `;
 
-      // Exibir LISTA somente para admin
       if (usuario.nivel === "admin") {
         btnLista.classList.remove("hidden");
-      } else {
-        btnLista.classList.add("hidden");
+        btnUsers.classList.remove("hidden");
       }
     }
 
-    function mostrarTelaLogin() {
-      const nome = prompt("Digite seu nome:");
-      if (!nome) return;
+    // ----------------------------------------
+    // 3) Login
+    // ----------------------------------------
+    function abrirLogin() {
+      document.getElementById("loginModal").classList.remove("hidden");
+    }
 
-      const nivel = prompt("Digite seu nível de acesso (admin / tecnico):")
-        ?.toLowerCase();
+    function fecharLogin() {
+      document.getElementById("loginModal").classList.add("hidden");
+    }
 
-      if (nivel !== "admin" && nivel !== "tecnico") {
-        alert("Nível inválido! Use: admin ou tecnico");
+    function fazerLogin() {
+      const user = document.getElementById("loginUser").value;
+      const senha = document.getElementById("loginPass").value;
+
+      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+      const encontrado = usuarios.find(u => u.user === user && u.senha === senha);
+
+      if (!encontrado) {
+        alert("Usuário ou senha incorretos!");
         return;
       }
 
-      localStorage.setItem("usuarioLogado", JSON.stringify({ nome, nivel }));
+      localStorage.setItem("usuarioLogado", JSON.stringify(encontrado));
+      fecharLogin();
       atualizarTela();
     }
 
+    // ----------------------------------------
+    // 4) Logout
+    // ----------------------------------------
     function logout() {
       localStorage.removeItem("usuarioLogado");
       atualizarTela();
@@ -115,3 +183,5 @@
 
 </body>
 </html>
+
+
