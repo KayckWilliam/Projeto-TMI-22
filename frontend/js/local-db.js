@@ -1,4 +1,3 @@
-// Banco de dados local usado apenas no modo mock
 
 export let criancasDB = [
   {

@@ -1,90 +1,36 @@
-import { API } from "./api.js";
+renderHeader();
 
-// Seletores
-const form = document.getElementById("formResponsavel");
-const lista = document.getElementById("listaResponsaveis");
-const idGeradoDiv = document.getElementById("idGerado");
+const formResp = document.getElementById("formResp");
+const vinculosBox = document.getElementById("vinculosBox");
 
-// Função para gerar ID automático
-function gerarId() {
-  return Math.floor(100000 + Math.random() * 900000);
+function gerarIdResp() {
+  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
+  return lista.length + 1;
 }
 
-// ID inicial
-let idAtual = gerarId();
-idGeradoDiv.innerText = idAtual;
 
-// ============================
-// CARREGAR LISTA
-// ============================
-async function carregarLista() {
-  const dados = await API.getAll("responsaveis");
+const fluxo = JSON.parse(localStorage.getItem("cadastroAtual") || "{}");
 
-  lista.innerHTML = "";
+vinculosBox.innerText = `Endereço vinculado: ${fluxo.enderecoId ? "Sim" : "-"} | Número de crianças: ${fluxo.criancaIds?.length || 0}`;
 
-  dados.forEach(r => {
-    lista.innerHTML += `
-      <tr class="border-b">
-        <td class="p-2">${r.id}</td>
-        <td class="p-2">${r.nome}</td>
-        <td class="p-2">${r.telefone}</td>
-        <td class="p-2">
-          <button onclick="excluir(${r.id})"
-            class="bg-red-500 text-white px-3 py-1 rounded">
-            Excluir
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-// ============================
-// SALVAR RESPONSÁVEL
-// ============================
-form.addEventListener("submit", async (e) => {
+formResp.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const novoResponsavel = {
-    id: idAtual,
-    nome: form.nome.value,
-    data_nascimento: form.data_nascimento.value,
-    cpf: form.cpf.value,
-    rg: form.rg.value,
-    crianca_id: form.crianca_id.value,
+  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
 
-    // Endereço
-    cep: form.cep.value,
-    rua: form.rua.value,
-    numero: form.numero.value,
-    bairro: form.bairro.value,
-    cidade: form.cidade.value,
-    estado: form.estado.value,
+  const novo = Object.fromEntries(new FormData(e.target));
 
-    // Contato
-    telefone: form.telefone.value,
-    email: form.email.value,
+  novo.id = gerarIdResp();
+  novo.enderecoId = fluxo.enderecoId;
+  novo.criancaIds = fluxo.criancaIds || [];
 
-    criado_em: new Date().toISOString()
-  };
+  lista.push(novo);
+  localStorage.setItem("responsaveis", JSON.stringify(lista));
 
-  await API.create("responsaveis", novoResponsavel);
+  localStorage.removeItem("cadastroAtual");
 
-  idAtual = gerarId();
-  idGeradoDiv.innerText = idAtual;
-
-  form.reset();
-  carregarLista();
+  alert("Responsável cadastrado com sucesso!");
+  window.location.href = "index.html";
 });
 
-// ============================
-// EXCLUIR
-// ============================
-async function excluir(id) {
-  await API.delete("responsaveis", id);
-  carregarLista();
-}
-
-carregarLista();
-window.excluir = excluir;
 

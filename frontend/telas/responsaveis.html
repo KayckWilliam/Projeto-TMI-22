@@ -8,106 +8,70 @@
 
 <body class="bg-gray-100">
 
-<div class="container mx-auto p-8 max-w-3xl">
+  <div id="header"></div>
 
-  <h1 class="text-3xl font-bold mb-8 text-center">Cadastro de Responsáveis</h1>
+  <div class="container mx-auto p-8 max-w-3xl">
 
-  <form id="formResp" class="bg-white shadow p-8 rounded-xl space-y-8">
+    <h1 class="text-3xl font-bold mb-8 text-center">Cadastro de Responsáveis</h1>
 
-    <div>
-      <h2 class="text-2xl font-semibold mb-4 border-b pb-2">1. Identificação</h2>
+    <form id="formResp" class="bg-white shadow p-8 rounded-xl space-y-8">
 
-      <label class="block mb-2">ID do Responsável</label>
-      <div id="idResp" class="p-2 bg-gray-100 border rounded font-bold"></div>
+      <div>
+        <h2 class="text-2xl font-semibold mb-4 border-b pb-2">1. Identificação</h2>
 
-      <label class="block mt-4">Nome</label>
-      <input name="nome" class="w-full p-2 border rounded" required>
+        <label class="block mt-4">Nome</label>
+        <input name="nome" class="w-full p-2 border rounded" required>
 
-      <label class="block mt-2">Data de Nascimento</label>
-      <input type="date" name="data_nascimento" class="w-full p-2 border rounded" required>
+        <label class="block mt-2">Data de Nascimento</label>
+        <input type="date" name="data_nascimento" class="w-full p-2 border rounded" required>
 
-      <label class="block mt-2">CPF</label>
-      <input name="cpf" class="w-full p-2 border rounded" required>
+        <label class="block mt-2">CPF</label>
+        <input name="cpf" class="w-full p-2 border rounded" required>
 
-      <label class="block mt-2">RG</label>
-      <input name="rg" class="w-full p-2 border rounded" required>
+        <label class="block mt-2">RG</label>
+        <input name="rg" class="w-full p-2 border rounded" required>
 
-      <!-- ⬇️ NOVO CAMPO: FILIAÇÃO -->
-      <label class="block mt-4">Filiação</label>
-      <select name="filiacao" class="w-full p-2 border rounded" required>
-        <option value="">Selecione...</option>
-        <option value="mãe">Mãe</option>
-        <option value="pai">Pai</option>
-        <option value="tio">Tio</option>
-        <option value="tia">Tia</option>
-        <option value="avô">Avô</option>
-        <option value="avó">Avó</option>
-        <option value="outro">Outro</option>
-        <option value="denunciante">Denunciante</option>
-      </select>
+        <label class="block mt-4">Filiação</label>
+        <select name="filiacao" class="w-full p-2 border rounded" required>
+          <option value="">Selecione...</option>
+          <option value="mãe">Mãe</option>
+          <option value="pai">Pai</option>
+          <option value="tio">Tio</option>
+          <option value="tia">Tia</option>
+          <option value="avô">Avô</option>
+          <option value="avó">Avó</option>
+          <option value="outro">Outro</option>
+          <option value="denunciante">Denunciante</option>
+        </select>
 
-      <!-- CAMPOS JÁ ADICIONADOS -->
-      <label class="block mt-4">Telefone</label>
-      <input name="telefone" class="w-full p-2 border rounded" required>
+        <label class="block mt-4">Telefone</label>
+        <input name="telefone" class="w-full p-2 border rounded" required>
 
-      <label class="block mt-2">Email</label>
-      <input type="email" name="email" class="w-full p-2 border rounded" required>
-    </div>
+        <label class="block mt-2">Email</label>
+        <input type="email" name="email" class="w-full p-2 border rounded" required>
+      </div>
 
-    <div>
-      <h2 class="text-xl font-semibold mb-2">IDs vinculados</h2>
+      <div>
+        <h2 class="text-xl font-semibold mb-2">Vínculos</h2>
+        <p id="vinculosBox" class="p-3 bg-blue-100 border rounded text-blue-700 font-bold"></p>
+      </div>
 
-      <p id="vinculosBox" class="p-3 bg-blue-100 border rounded text-blue-700 font-bold"></p>
-    </div>
+      <button class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700">
+        Salvar
+      </button>
 
-    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg">
-      Salvar
-    </button>
+    </form>
 
-  </form>
+  </div>
 
-</div>
-
-<script>
-// ID sequencial responsável
-function gerarIdResp() {
-  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
-  return lista.length + 1;
-}
-
-document.getElementById("idResp").innerText = gerarIdResp();
-
-// Recuperar vínculo
-const fluxo = JSON.parse(localStorage.getItem("cadastroAtual"));
-
-document.getElementById("vinculosBox").innerText =
-  `Endereço: ${fluxo.enderecoId} | Crianças: ${fluxo.criancaIds.join(", ")}`;
-
-// Salvamento final
-document.getElementById("formResp").addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
-
-  const novo = Object.fromEntries(new FormData(e.target));
-
-  novo.id = gerarIdResp();
-  novo.enderecoId = fluxo.enderecoId;
-  novo.criancaIds = fluxo.criancaIds;
-
-  lista.push(novo);
-  localStorage.setItem("responsaveis", JSON.stringify(lista));
-
-  // Limpa fluxo de cadastro
-  localStorage.removeItem("cadastroAtual");
-
-  alert("Responsável cadastrado com sucesso!");
-  window.location.href = "index.html";
-});
-</script>
+  <script src="../js/header.js"></script>
+  <script src="../js/responsaveis.js"></script>
 
 </body>
 </html>
+
+
+
 
 
 

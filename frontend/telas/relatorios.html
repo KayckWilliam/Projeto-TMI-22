@@ -3,154 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <title>Pesquisar Criança</title>
+  <title>Relatórios</title>
 </head>
 
 <body class="bg-gray-100">
 
-<div class="container mx-auto p-8">
+  <div id="header"></div>
 
-  <h1 class="text-3xl font-bold mb-8 text-center">Pesquisar Criança</h1>
+  <div class="container mx-auto p-8">
 
-  <!-- CAMPO DE PESQUISA -->
-  <input 
-    type="text" 
-    id="campoPesquisa"
-    placeholder="Digite o nome da criança"
-    class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-    oninput="filtrarCriancas()"
-  />
+    <h1 class="text-3xl font-bold mb-8 text-center">Pesquisar Criança</h1>
 
-  <!-- RESULTADOS DA PESQUISA -->
-  <ul 
-    id="resultadosPesquisa" 
-    class="bg-white shadow rounded p-4 mt-4 space-y-2 hidden">
-  </ul>
-
-  <!-- ÁREA DO RELATÓRIO -->
-  <div class="bg-white p-6 rounded-lg shadow mt-8">
-
-    <h2 class="text-2xl font-bold mb-4">RELATÓRIO</h2>
-
-    <!-- DATA AUTOMÁTICA -->
     <input 
-       type="text" 
-       id="dataRelatorio"
-       class="w-60 p-2 border rounded mb-4 bg-gray-100 font-semibold"
-       readonly
+      type="text" 
+      id="campoPesquisa"
+      placeholder="Digite o nome da criança"
+      class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
     />
 
-    <!-- TEXTO DO RELATÓRIO -->
-    <textarea
-       id="textoRelatorio"
-       rows="6"
-       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-       placeholder="Digite o relatório aqui..."
-    ></textarea>
+    <ul 
+      id="resultadosPesquisa" 
+      class="bg-white shadow rounded p-4 mt-4 space-y-2 hidden">
+    </ul>
 
-    <!-- BOTÃO SALVAR -->
-    <button
-       class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-       onclick="salvarRelatorio()"
-    >
-      Salvar Relatório
-    </button>
+    <div class="bg-white p-6 rounded-lg shadow mt-8">
+
+      <h2 class="text-2xl font-bold mb-4">RELATÓRIO</h2>
+
+      <input 
+         type="text" 
+         id="dataRelatorio"
+         class="w-60 p-2 border rounded mb-4 bg-gray-100 font-semibold"
+         readonly
+      />
+
+      <textarea
+         id="textoRelatorio"
+         rows="6"
+         class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+         placeholder="Digite o relatório aqui..."
+      ></textarea>
+
+      <button
+         class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+         onclick="salvarRelatorio()"
+      >
+        Salvar Relatório
+      </button>
+
+    </div>
+
+    <div class="bg-white mt-10 p-6 rounded-lg shadow">
+      <h2 class="text-2xl font-bold mb-4">RELATÓRIOS SALVOS</h2>
+      <div id="listaRelatorios" class="space-y-3"></div>
+    </div>
+
+    <div class="text-center mt-6">
+      <a href="index.html"
+         class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
+         Voltar
+      </a>
+    </div>
 
   </div>
 
-  <!-- BOTÃO VOLTAR -->
-  <div class="text-center mt-6">
-    <a href="index.html"
-       class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
-       Voltar
-    </a>
-  </div>
-
-</div>
-
-<script src="/js/api.js"></script>
-
-<script>
-let listaCriancas = [];
-let criancaSelecionada = null;
-
-// Carrega lista das crianças
-async function carregarCriancas() {
-  listaCriancas = await fetch(API.criancas).then(r => r.json());
-}
-
-carregarCriancas();
-
-// Filtra enquanto digita
-function filtrarCriancas() {
-  const texto = document.getElementById("campoPesquisa").value.toLowerCase();
-  const ul = document.getElementById("resultadosPesquisa");
-  ul.innerHTML = "";
-
-  if (texto.trim() === "") {
-    ul.classList.add("hidden");
-    return;
-  }
-
-  const filtradas = listaCriancas.filter(c =>
-    c.nome.toLowerCase().includes(texto)
-  );
-
-  if (filtradas.length === 0) {
-    ul.innerHTML = `<li class="p-2 text-gray-500">Nenhuma criança encontrada...</li>`;
-  } else {
-    filtradas.forEach(c => {
-      ul.innerHTML += `
-        <li>
-          <button 
-            onclick="selecionarCrianca(${c.id}, '${c.nome}')"
-            class="block w-full text-left p-2 rounded hover:bg-blue-50 cursor-pointer">
-            ${c.nome}
-          </button>
-        </li>
-      `;
-    });
-  }
-
-  ul.classList.remove("hidden");
-}
-
-// Quando clicar no nome da criança
-function selecionarCrianca(id, nome) {
-  criancaSelecionada = { id, nome };
-  document.getElementById("campoPesquisa").value = nome;
-  document.getElementById("resultadosPesquisa").classList.add("hidden");
-}
-
-// Define automaticamente a data no formato solicitado
-function definirDataAtual() {
-  let hoje = new Date();
-  let dia = String(hoje.getDate()).padStart(2, '0');
-  let mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  let ano = hoje.getFullYear();
-
-  document.getElementById("dataRelatorio").value = `DATA: ${dia}/${mes}/${ano}`;
-}
-
-definirDataAtual();
-
-// Botão salvar
-function salvarRelatorio() {
-  if (!criancaSelecionada) {
-    alert("Selecione uma criança antes de salvar o relatório!");
-    return;
-  }
-
-  const texto = document.getElementById("textoRelatorio").value.trim();
-
-  if (texto.length < 3) {
-    alert("Digite o relatório antes de salvar!");
-    return;
-  }
-
-  alert(`Relatório salvo para: ${criancaSelecionada.nome}`);
-}
-</script>
+  <script src="../js/header.js"></script>
+  <script src="../js/relatorios.js"></script>
 
 </body>
 </html>
+
+

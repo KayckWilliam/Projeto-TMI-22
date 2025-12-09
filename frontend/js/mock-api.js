@@ -7,14 +7,12 @@ import {
 
 export const MockAPI = {
   
-  // GET ALL
   getAll(tipo) {
     return new Promise(resolve => {
       setTimeout(() => resolve(getDB(tipo)), 200);
     });
   },
 
-  // GET BY ID
   getById(tipo, id) {
     return new Promise(resolve => {
       const tabela = getDB(tipo);
@@ -22,7 +20,6 @@ export const MockAPI = {
     });
   },
 
-  // CREATE
   create(tipo, data) {
     return new Promise(resolve => {
       const tabela = getDB(tipo);
@@ -31,7 +28,6 @@ export const MockAPI = {
     });
   },
 
-  // DELETE
   delete(tipo, id) {
     return new Promise(resolve => {
       let tabela = getDB(tipo);
@@ -42,7 +38,6 @@ export const MockAPI = {
   }
 };
 
-// função privada
 function getDB(tipo) {
   switch (tipo) {
     case "criancas": return criancasDB;

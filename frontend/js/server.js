@@ -1,7 +1,7 @@
 import express from "express";
 const app = express();
 
-app.use(express.static("public")); // pasta com seus HTML
+app.use(express.static("public")); 
 
 app.get("/api/criancas", (req, res) => {
   res.json([

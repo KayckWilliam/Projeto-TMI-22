@@ -1,76 +1,81 @@
-import { API } from "./api.js";
+renderHeader();
 
-// Seleciona elementos
-const form = document.getElementById("formCrianca");
-const lista = document.getElementById("listaCriancas");
-const idGeradoDiv = document.getElementById("idGerado");
+let listaTemp = [];
 
-// Função para gerar ID automático
-function gerarId() {
-  return Math.floor(100000 + Math.random() * 900000);
+
+function gerarIdCrianca() {
+  let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
+  return lista.length + 1;
 }
 
-// ID inicial
-let idAtual = gerarId();
-idGeradoDiv.innerText = idAtual;
 
-// ============================
-// CARREGAR LISTA
-// ============================
-async function carregarLista() {
-  const dados = await API.getAll("criancas");
+function atualizarListaTemp() {
+  const ul = document.getElementById("listaTemp");
+  ul.innerHTML = "";
 
-  lista.innerHTML = "";
+  listaTemp.forEach((c, index) => {
+    const li = document.createElement("li");
+    li.className = "p-3 bg-gray-100 rounded flex justify-between items-center";
 
-  dados.forEach(c => {
-    lista.innerHTML += `
-      <tr class="border-b">
-        <td class="p-2">${c.id}</td>
-        <td class="p-2">${c.nome}</td>
-        <td class="p-2">
-          <button onclick="excluir(${c.id})"
-            class="bg-red-500 text-white px-3 py-1 rounded">
-            Excluir
-          </button>
-        </td>
-      </tr>
+    li.innerHTML = `
+      <span>${c.nome} (nasc: ${c.data_nascimento})</span>
+      <button onclick="removerTemp(${index})"
+        class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+        Remover
+      </button>
     `;
+    ul.appendChild(li);
   });
 }
 
-// ============================
-// SALVAR CRIANÇA
-// ============================
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
 
-  const novaCrianca = {
-    id: idAtual,
-    nome: form.nome.value,
-    data_nascimento: form.data_nascimento.value,
-    criado_em: new Date().toISOString()
-  };
-
-  await API.create("criancas", novaCrianca);
-
-  // Novo ID para próximo cadastro
-  idAtual = gerarId();
-  idGeradoDiv.innerText = idAtual;
-
-  form.reset();
-  carregarLista();
-});
-
-// ============================
-// EXCLUIR
-// ============================
-async function excluir(id) {
-  await API.delete("criancas", id);
-  carregarLista();
+function removerTemp(index) {
+  listaTemp.splice(index, 1);
+  atualizarListaTemp();
 }
 
-// Inicializa tabela
-carregarLista();
 
-// Deixa função disponível globalmente para onclick=""
-window.excluir = excluir;
+document.getElementById("btnAdicionar").addEventListener("click", () => {
+  const nome = document.getElementById("nome").value.trim();
+  const data = document.getElementById("data_nascimento").value;
+
+  if (!nome || !data) {
+    alert("Preencha todos os campos!");
+    return;
+  }
+
+  const novoId = gerarIdCrianca() + listaTemp.length;
+
+  listaTemp.push({ id: novoId, nome, data_nascimento: data });
+
+  atualizarListaTemp();
+
+  document.getElementById("nome").value = "";
+  document.getElementById("data_nascimento").value = "";
+});
+
+
+document.getElementById("btnSalvarContinuar").addEventListener("click", () => {
+  if (listaTemp.length === 0) {
+    alert("Adicione pelo menos uma criança!");
+    return;
+  }
+
+  let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
+  lista.push(...listaTemp);
+  localStorage.setItem("criancas", JSON.stringify(lista));
+
+  let fluxo = JSON.parse(localStorage.getItem("cadastroAtual") || "{}");
+  fluxo.criancaIds = listaTemp.map(c => c.id);
+  localStorage.setItem("cadastroAtual", JSON.stringify(fluxo));
+
+  listaTemp = [];
+  atualizarListaTemp();
+
+  window.location.href = "responsaveis.html";
+});
+
+
+
+
+

@@ -8,96 +8,64 @@
 
 <body class="bg-gray-100">
 
-<div class="container mx-auto p-8 max-w-2xl">
+  <div id="header"></div>
 
-  <h1 class="text-3xl font-bold mb-8 text-center">Cadastrar Endereço</h1>
+  <div class="container mx-auto p-8 max-w-2xl">
 
-  <form id="formEndereco" class="bg-white shadow p-6 rounded-xl space-y-4">
+    <h1 class="text-3xl font-bold mb-8 text-center">Cadastrar Endereço</h1>
 
-    <div>
-      <label class="font-medium">CEP:</label>
-      <input type="text" id="cep" class="w-full p-2 border rounded">
+    <form id="formEndereco" class="bg-white shadow p-6 rounded-xl space-y-4">
+
+      <div>
+        <label class="font-medium">CEP:</label>
+        <input type="text" id="cep" class="w-full p-2 border rounded">
+      </div>
+
+      <div>
+        <label class="font-medium">Rua:</label>
+        <input type="text" id="rua" class="w-full p-2 border rounded">
+      </div>
+
+      <div>
+        <label class="font-medium">Número:</label>
+        <input type="text" id="numero" class="w-full p-2 border rounded">
+      </div>
+
+      <div>
+        <label class="font-medium">Bairro:</label>
+        <input type="text" id="bairro" class="w-full p-2 border rounded">
+      </div>
+
+      <div>
+        <label class="font-medium">Cidade:</label>
+        <input type="text" id="cidade" class="w-full p-2 border rounded">
+      </div>
+
+      <div>
+        <label class="font-medium">Estado:</label>
+        <input type="text" id="estado" class="w-full p-2 border rounded">
+      </div>
+
+      <button type="submit"
+        class="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
+        Salvar Endereço
+      </button>
+
+    </form>
+
+    <div class="text-center mt-8">
+      <a href="index.html"
+         class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
+        Voltar
+      </a>
     </div>
 
-    <div>
-      <label class="font-medium">Rua:</label>
-      <input type="text" id="rua" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label class="font-medium">Número:</label>
-      <input type="text" id="numero" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label class="font-medium">Bairro:</label>
-      <input type="text" id="bairro" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label class="font-medium">Cidade:</label>
-      <input type="text" id="cidade" class="w-full p-2 border rounded">
-    </div>
-
-    <div>
-      <label class="font-medium">Estado:</label>
-      <input type="text" id="estado" class="w-full p-2 border rounded">
-    </div>
-
-    <button type="submit"
-      class="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
-      Salvar Endereço
-    </button>
-
-  </form>
-
-  <div class="text-center mt-8">
-    <a href="index.html"
-       class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
-      Voltar
-    </a>
   </div>
 
-</div>
-
-<script>
-// ==== GERADOR DE ID SEQUENCIAL ====
-function gerarIdEndereco() {
-  let lista = JSON.parse(localStorage.getItem("enderecos") || "[]");
-  return lista.length + 1;
-}
-
-// ==== SALVAR ENDEREÇO ====
-document.getElementById("formEndereco").addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const lista = JSON.parse(localStorage.getItem("enderecos") || "[]");
-
-  const novoId = gerarIdEndereco();
-
-  const endereco = {
-    id: novoId,
-    cep: cep.value,
-    rua: rua.value,
-    numero: numero.value,
-    bairro: bairro.value,
-    cidade: cidade.value,
-    estado: estado.value
-  };
-
-  lista.push(endereco);
-  localStorage.setItem("enderecos", JSON.stringify(lista));
-
-  // CRIA O PACOTE DE CADASTRO TEMPORÁRIO
-  localStorage.setItem("cadastroAtual", JSON.stringify({
-    enderecoId: novoId,
-    criancaIds: []
-  }));
-
-  window.location.href = "criancas.html";
-});
-</script>
+  <script src="../js/header.js"></script>
+  <script src="../js/enderecos.js"></script>
 
 </body>
 </html>
+
 

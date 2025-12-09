@@ -9,179 +9,48 @@
 
 <body class="bg-gray-100">
 
+  <div id="header"></div>
+
   <div class="container mx-auto p-8">
-
-    <!-- Cabeçalho com login -->
-    <div class="flex justify-between items-center mb-10">
-      <h1 class="text-3xl font-bold">Sistema de Cadastro</h1>
-
-      <!-- Área de login/logout -->
-      <div id="loginArea"></div>
-    </div>
-
-    <!-- Conteúdo principal -->
     <div class="flex flex-col items-center gap-6 max-w-md mx-auto">
 
-      <!-- Botão Cadastro -->
       <a href="cadastro.html"
-        class="w-full text-center p-6 bg-white shadow rounded-xl 
-               hover:bg-blue-50 transition text-xl font-semibold">
+        class="w-full text-center p-6 bg-white shadow rounded-xl hover:bg-blue-50 transition text-xl font-semibold">
         Cadastro
       </a>
 
-      <!-- Botão Relatórios -->
       <a href="relatorios.html"
-        class="w-full text-center p-6 bg-white shadow rounded-xl 
-               hover:bg-green-50 transition text-xl font-semibold">
+        class="w-full text-center p-6 bg-white shadow rounded-xl hover:bg-green-50 transition text-xl font-semibold">
         Relatórios
       </a>
 
-      <!-- BOTÃO LISTA → ADMIN apenas -->
       <a id="btnLista" href="lista.html"
-        class="hidden w-full text-center p-6 bg-white shadow rounded-xl 
-               hover:bg-purple-50 transition text-xl font-semibold">
+        class="hidden w-full text-center p-6 bg-white shadow rounded-xl hover:bg-purple-50 transition text-xl font-semibold">
         Lista (Admin)
       </a>
 
-      <!-- BOTÃO USERS → ADMIN apenas -->
       <a id="btnUsers" href="users.html"
-        class="hidden w-full text-center p-6 bg-white shadow rounded-xl 
-               hover:bg-yellow-50 transition text-xl font-semibold">
+        class="hidden w-full text-center p-6 bg-white shadow rounded-xl hover:bg-yellow-50 transition text-xl font-semibold">
         Usuários (Admin)
       </a>
 
     </div>
-
   </div>
 
-  <!-- MODAL DE LOGIN -->
-  <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-    <div class="bg-white p-8 rounded-lg w-96 shadow-xl">
+  <script src="../js/header.js"></script>
 
-      <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
-
-      <label class="font-medium">Usuário</label>
-      <input id="loginUser" class="w-full p-2 border rounded mb-4">
-
-      <label class="font-medium">Senha</label>
-      <input id="loginPass" type="password" class="w-full p-2 border rounded mb-6">
-
-      <div class="flex justify-between">
-        <button onclick="fazerLogin()"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          Entrar
-        </button>
-
-        <button onclick="fecharLogin()"
-          class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
-          Cancelar
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- SCRIPT DE LOGIN / USUÁRIOS -->
   <script>
-    // ----------------------------------------
-    // 1) Criar usuário padrão se não existir
-    // ----------------------------------------
-    function inicializarUsuarios() {
-      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+    renderHeader(); 
 
-      if (!usuarios.some(u => u.user === "helmer")) {
-        usuarios.push({
-          user: "helmer",
-          senha: "123456",
-          nivel: "admin"
-        });
-        localStorage.setItem("usuarios", JSON.stringify(usuarios));
-      }
+    const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+    if (usuario?.nivel === "admin") {
+      document.getElementById("btnLista").classList.remove("hidden");
+      document.getElementById("btnUsers").classList.remove("hidden");
     }
-    inicializarUsuarios();
-
-    // ----------------------------------------
-    // 2) Atualizar interface
-    // ----------------------------------------
-    function atualizarTela() {
-      const loginArea = document.getElementById("loginArea");
-      const btnLista = document.getElementById("btnLista");
-      const btnUsers = document.getElementById("btnUsers");
-
-      const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
-
-      if (!usuario) {
-        loginArea.innerHTML = `
-          <button onclick="abrirLogin()" 
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
-            Login
-          </button>
-        `;
-        btnLista.classList.add("hidden");
-        btnUsers.classList.add("hidden");
-        return;
-      }
-
-      loginArea.innerHTML = `
-        <div class="flex items-center gap-3">
-          <span class="text-gray-700 font-medium">
-            Olá, ${usuario.user} (${usuario.nivel})
-          </span>
-
-          <button onclick="logout()" 
-            class="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600">
-            Logout
-          </button>
-        </div>
-      `;
-
-      if (usuario.nivel === "admin") {
-        btnLista.classList.remove("hidden");
-        btnUsers.classList.remove("hidden");
-      }
-    }
-
-    // ----------------------------------------
-    // 3) Login
-    // ----------------------------------------
-    function abrirLogin() {
-      document.getElementById("loginModal").classList.remove("hidden");
-    }
-
-    function fecharLogin() {
-      document.getElementById("loginModal").classList.add("hidden");
-    }
-
-    function fazerLogin() {
-      const user = document.getElementById("loginUser").value;
-      const senha = document.getElementById("loginPass").value;
-
-      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-
-      const encontrado = usuarios.find(u => u.user === user && u.senha === senha);
-
-      if (!encontrado) {
-        alert("Usuário ou senha incorretos!");
-        return;
-      }
-
-      localStorage.setItem("usuarioLogado", JSON.stringify(encontrado));
-      fecharLogin();
-      atualizarTela();
-    }
-
-    // ----------------------------------------
-    // 4) Logout
-    // ----------------------------------------
-    function logout() {
-      localStorage.removeItem("usuarioLogado");
-      atualizarTela();
-    }
-
-    atualizarTela();
   </script>
 
 </body>
 </html>
+
 
 

@@ -8,7 +8,10 @@
 
 <body class="bg-gray-100">
 
+  <div id="header"></div>
+
   <div class="container mx-auto p-8">
+
     <h1 class="text-3xl font-bold mb-8 text-center">Lista de Responsáveis</h1>
 
     <a href="index.html"
@@ -19,170 +22,25 @@
     <div id="listaResponsaveis" class="space-y-6"></div>
   </div>
 
-
-  <!-- ======================= MODAL DETALHES ======================= -->
   <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-6">
     <div class="bg-white p-6 rounded-xl shadow-xl max-w-lg w-full">
       <h2 class="text-2xl font-bold mb-4">Detalhes do Responsável</h2>
 
-      <div id="modalContent" class="space-y-2 text-gray-700"></div>
+      <div id="modalContent" class="space-y-3 text-gray-700"></div>
 
       <button onclick="fecharModal()" 
-        class="mt-4 w-full py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+        class="mt-4 w-full py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
         Fechar
       </button>
     </div>
   </div>
 
-
-<script>
-function carregarResponsaveis() {
-  return JSON.parse(localStorage.getItem("responsaveis") || "[]");
-}
-
-function carregarCriancas() {
-  return JSON.parse(localStorage.getItem("criancas") || "[]");
-}
-
-function carregarEnderecos() {
-  return JSON.parse(localStorage.getItem("enderecos") || "[]");
-}
-
-function salvarResponsaveis(lista) {
-  localStorage.setItem("responsaveis", JSON.stringify(lista));
-}
-
-
-
-// ====================== EXCLUIR RESPONSÁVEL =======================
-function removerResponsavel(id) {
-  if (!confirm("Tem certeza que deseja excluir este responsável?")) return;
-
-  let lista = carregarResponsaveis();
-  lista = lista.filter(r => r.id !== id);
-  salvarResponsaveis(lista);
-  render();
-}
-
-
-
-// ====================== EXCLUIR CRIANÇA =======================
-function removerCrianca(idResponsavel, criancaId) {
-  if (!confirm("Deseja realmente remover esta criança deste responsável?")) return;
-
-  let lista = carregarResponsaveis();
-  const resp = lista.find(r => r.id === idResponsavel);
-  if (!resp) return;
-
-  resp.criancaIds = resp.criancaIds.filter(id => id !== criancaId);
-
-  salvarResponsaveis(lista);
-  render();
-}
-
-
-
-// ====================== ABRIR MODAL =======================
-function abrirModal(resp) {
-  const criancas = carregarCriancas();
-  const enderecos = carregarEnderecos();
-
-  const endereco = enderecos.find(e => e.id == resp.enderecoId);
-
-  let listaCriancas = resp.criancaIds
-    .map(id => {
-      const c = criancas.find(cc => cc.id == id);
-      return c ? `• ${c.nome} (ID ${c.id})` : "Desconhecida";
-    })
-    .join("<br>");
-
-  document.getElementById("modalContent").innerHTML = `
-    <p><strong>ID:</strong> ${resp.id}</p>
-    <p><strong>Nome:</strong> ${resp.nome}</p>
-    <p><strong>Telefone:</strong> ${resp.telefone || "Não informado"}</p>
-    <p><strong>Email:</strong> ${resp.email || "Não informado"}</p>
-    <p><strong>Filiação:</strong> ${resp.filiacao || "Não informada"}</p>
-
-    <h3 class="text-lg font-semibold mt-4 border-b pb-1">Endereço Vinculado</h3>
-    ${
-      endereco
-        ? `
-        <p>${endereco.rua}, ${endereco.numero}</p>
-        <p>${endereco.bairro} - ${endereco.cidade}/${endereco.estado}</p>
-        <p>CEP: ${endereco.cep}</p>
-        `
-        : "<p class='text-gray-500'>Endereço não encontrado.</p>"
-    }
-
-    <h3 class="text-lg font-semibold mt-4 border-b pb-1">Crianças Vinculadas</h3>
-    <p>${listaCriancas || "Nenhuma criança vinculada."}</p>
-  `;
-
-  document.getElementById("modal").classList.remove("hidden");
-}
-
-function fecharModal() {
-  document.getElementById("modal").classList.add("hidden");
-}
-
-
-
-// ======================= RENDER DA LISTA =======================
-function render() {
-  const container = document.getElementById("listaResponsaveis");
-  const responsaveis = carregarResponsaveis();
-  const criancas = carregarCriancas();
-
-  if (responsaveis.length === 0) {
-    container.innerHTML = `
-      <p class="text-gray-600 text-center text-lg">Nenhum responsável cadastrado.</p>
-    `;
-    return;
-  }
-
-  container.innerHTML = "";
-
-  responsaveis.forEach(resp => {
-
-    const card = document.createElement("div");
-    card.className = "bg-white shadow-lg rounded-xl p-6";
-
-    const criancasVinculadas = resp.criancaIds.map(id => {
-      const c = criancas.find(cc => cc.id === id);
-      return c ? `<li>${c.nome} (ID ${c.id})</li>` : "";
-    }).join("");
-
-    card.innerHTML = `
-      <div class="flex justify-between items-center mb-4">
-        <button onclick='abrirModal(${JSON.stringify(resp)})'
-          class="text-2xl font-bold text-blue-700 hover:underline">
-          ${resp.nome}
-        </button>
-
-        <button onclick="removerResponsavel(${resp.id})"
-          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-          Excluir
-        </button>
-      </div>
-
-      <p class="text-gray-700"><strong>ID:</strong> ${resp.id}</p>
-      <p class="text-gray-700"><strong>Filiação:</strong> ${resp.filiacao || "Não informada"}</p>
-
-      <h3 class="text-xl font-semibold mt-4 mb-2 border-b pb-1">Crianças</h3>
-
-      <ul class="ml-6 list-disc">
-        ${criancasVinculadas || "<p class='text-gray-500'>Nenhuma criança vinculada.</p>"}
-      </ul>
-    `;
-
-    container.appendChild(card);
-  });
-}
-
-render();
-</script>
+  <script src="../js/header.js"></script>
+  <script src="../js/lista.js"></script>
 
 </body>
 </html>
+
+
 
 
