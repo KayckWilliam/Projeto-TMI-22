@@ -31,12 +31,6 @@
     <label class="block mb-2">Data de nascimento</label>
     <input type="date" name="data_nascimento" required class="w-full p-2 border rounded mb-4" />
 
-    <!-- Botões -->
-    <div class="flex gap-4 mt-4">
-      <button type="submit"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Salvar
-      </button>
 
       <button id="btnSalvarContinuar" type="button"
         class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
@@ -88,12 +82,6 @@
     localStorage.setItem("criancas", JSON.stringify(lista));
   }
 
-  // --- BOTÃO SALVAR NORMAL ---
-  document.getElementById("formCrianca").addEventListener("submit", (e) => {
-    e.preventDefault();
-    salvarCriancaLocal();
-    location.reload(); // Atualiza a tela
-  });
 
   // --- BOTÃO SALVAR E CONTINUAR ---
   document.getElementById("btnSalvarContinuar").addEventListener("click", () => {
