@@ -3,47 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <title>Relatórios</title>
+  <title>Pesquisar Criança</title>
 </head>
 
 <body class="bg-gray-100">
 
 <div class="container mx-auto p-8">
 
-  <h1 class="text-3xl font-bold mb-8 text-center">Relatórios de Cadastros</h1>
+  <h1 class="text-3xl font-bold mb-8 text-center">Pesquisar Criança</h1>
 
-  <!-- ===================== -->
-  <!-- LISTA DE CRIANÇAS -->
-  <!-- ===================== -->
-  <section class="mb-10">
-    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Crianças Cadastradas</h2>
-    <ul id="listaCriancas" class="bg-white shadow rounded p-4 space-y-2">
-      <!-- preenchido via JS -->
-    </ul>
-  </section>
+  <!-- CAMPO DE PESQUISA -->
+  <input 
+    type="text" 
+    id="campoPesquisa"
+    placeholder="Digite o nome da criança"
+    class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+    oninput="filtrarCriancas()"
+  />
 
-  <!-- ===================== -->
-  <!-- LISTA DE RESPONSÁVEIS -->
-  <!-- ===================== -->
-  <section class="mb-10">
-    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Responsáveis Cadastrados</h2>
-    <ul id="listaResponsaveis" class="bg-white shadow rounded p-4 space-y-2">
-      <!-- preenchido via JS -->
-    </ul>
-  </section>
-
-  <!-- ===================== -->
-  <!-- LISTA DE DENUNCIANTES -->
-  <!-- ===================== -->
-  <section class="mb-10">
-    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Denunciantes Cadastrados</h2>
-    <ul id="listaDenunciantes" class="bg-white shadow rounded p-4 space-y-2">
-      <!-- preenchido via JS -->
-    </ul>
-  </section>
+  <!-- RESULTADOS DA PESQUISA -->
+  <ul 
+    id="resultadosPesquisa" 
+    class="bg-white shadow rounded p-4 mt-4 space-y-2 hidden">
+  </ul>
 
   <!-- BOTÃO VOLTAR -->
-  <div class="text-center">
+  <div class="text-center mt-6">
     <a href="index.html"
        class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
        Voltar
@@ -55,58 +40,47 @@
 <script src="/js/api.js"></script>
 
 <script>
-async function carregarRelatorios() {
+let listaCriancas = [];
 
-  // Carregar crianças
-  const criancas = await fetch(API.criancas).then(r => r.json());
-  const ulCriancas = document.getElementById("listaCriancas");
-  ulCriancas.innerHTML = "";
-
-  criancas.forEach(c => {
-    ulCriancas.innerHTML += `
-      <li>
-        <a href="detalhes.html?id=${c.id}&type=crianca"
-           class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
-           ${c.nome}
-        </a>
-      </li>
-    `;
-  });
-
-  // Carregar responsáveis
-  const responsaveis = await fetch(API.responsaveis).then(r => r.json());
-  const ulResp = document.getElementById("listaResponsaveis");
-  ulResp.innerHTML = "";
-
-  responsaveis.forEach(r => {
-    ulResp.innerHTML += `
-      <li>
-        <a href="detalhes.html?id=${r.id}&type=responsavel"
-           class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
-           ${r.nome}
-        </a>
-      </li>
-    `;
-  });
-
-  // Carregar denunciantes
-  const denunciantes = await fetch(API.denunciantes).then(r => r.json());
-  const ulDen = document.getElementById("listaDenunciantes");
-  ulDen.innerHTML = "";
-
-  denunciantes.forEach(d => {
-    ulDen.innerHTML += `
-      <li>
-        <a href="detalhes.html?id=${d.id}&type=denunciante"
-           class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
-           ${d.nome}
-        </a>
-      </li>
-    `;
-  });
+// Carrega todas as crianças ao abrir a página
+async function carregarCriancas() {
+  listaCriancas = await fetch(API.criancas).then(r => r.json());
 }
 
-carregarRelatorios();
+carregarCriancas();
+
+// Filtra enquanto digita
+function filtrarCriancas() {
+  const texto = document.getElementById("campoPesquisa").value.toLowerCase();
+  const ul = document.getElementById("resultadosPesquisa");
+  ul.innerHTML = "";
+
+  if (texto.trim() === "") {
+    ul.classList.add("hidden");
+    return;
+  }
+
+  const filtradas = listaCriancas.filter(c =>
+    c.nome.toLowerCase().includes(texto)
+  );
+
+  if (filtradas.length === 0) {
+    ul.innerHTML = `<li class="p-2 text-gray-500">Nenhuma criança encontrada...</li>`;
+  } else {
+    filtradas.forEach(c => {
+      ul.innerHTML += `
+        <li>
+          <a href="relatorio.html?id=${c.id}"
+            class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
+            ${c.nome}
+          </a>
+        </li>
+      `;
+    });
+  }
+
+  ul.classList.remove("hidden");
+}
 </script>
 
 </body>
