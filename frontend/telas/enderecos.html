@@ -12,7 +12,6 @@
 
   <h1 class="text-3xl font-bold mb-8 text-center">Cadastrar Endereço</h1>
 
-  <!-- FORMULÁRIO -->
   <form id="formEndereco" class="bg-white shadow p-6 rounded-xl space-y-4">
 
     <div>
@@ -45,26 +44,13 @@
       <input type="text" id="estado" class="w-full p-2 border rounded">
     </div>
 
-    <!-- BOTÕES -->
-    <div class="flex gap-4 pt-4">
-
-      <!-- BOTÃO SALVAR (salva + avança) -->
-      <button type="submit"
-        class="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
-        Salvar Endereço
-      </button>
-
-      <!-- BOTÃO IR DIRETO PARA CRIANÇAS (NÃO SALVA) -->
-      <button type="button" id="btnIrCriancas"
-        class="w-full py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition">
-        Ir para Crianças
-      </button>
-
-    </div>
+    <button type="submit"
+      class="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition">
+      Salvar Endereço
+    </button>
 
   </form>
 
-  <!-- BOTÃO VOLTAR -->
   <div class="text-center mt-8">
     <a href="index.html"
        class="px-6 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition text-lg font-medium">
@@ -74,38 +60,44 @@
 
 </div>
 
-<script src="/js/api.js"></script>
-
 <script>
-// ENVIO NORMAL DO FORMULÁRIO
-document.getElementById("formEndereco").addEventListener("submit", async (e) => {
+// ==== GERADOR DE ID SEQUENCIAL ====
+function gerarIdEndereco() {
+  let lista = JSON.parse(localStorage.getItem("enderecos") || "[]");
+  return lista.length + 1;
+}
+
+// ==== SALVAR ENDEREÇO ====
+document.getElementById("formEndereco").addEventListener("submit", (e) => {
   e.preventDefault();
 
+  const lista = JSON.parse(localStorage.getItem("enderecos") || "[]");
+
+  const novoId = gerarIdEndereco();
+
   const endereco = {
-    cep: document.getElementById("cep").value,
-    rua: document.getElementById("rua").value,
-    numero: document.getElementById("numero").value,
-    bairro: document.getElementById("bairro").value,
-    cidade: document.getElementById("cidade").value,
-    estado: document.getElementById("estado").value,
+    id: novoId,
+    cep: cep.value,
+    rua: rua.value,
+    numero: numero.value,
+    bairro: bairro.value,
+    cidade: cidade.value,
+    estado: estado.value
   };
 
-  // Envia sem validar
-  fetch(API.enderecos, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(endereco)
-  });
+  lista.push(endereco);
+  localStorage.setItem("enderecos", JSON.stringify(lista));
 
-  // Redireciona
-  window.location.href = "criancas.html";
-});
+  // CRIA O PACOTE DE CADASTRO TEMPORÁRIO
+  localStorage.setItem("cadastroAtual", JSON.stringify({
+    enderecoId: novoId,
+    criancaIds: []
+  }));
 
-// IR DIRETO PARA A PÁGINA CRIANÇAS (NÃO SALVA)
-document.getElementById("btnIrCriancas").addEventListener("click", () => {
   window.location.href = "criancas.html";
 });
 </script>
 
 </body>
 </html>
+

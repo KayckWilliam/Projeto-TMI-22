@@ -12,174 +12,79 @@
 
   <h1 class="text-3xl font-bold mb-8 text-center">Cadastro de Responsáveis</h1>
 
-  <form id="formResponsavel" class="bg-white shadow p-8 rounded-xl space-y-8">
+  <form id="formResp" class="bg-white shadow p-8 rounded-xl space-y-8">
 
-    <!-- ========================== -->
-    <!-- SEÇÃO 1 — Identificação -->
-    <!-- ========================== -->
     <div>
       <h2 class="text-2xl font-semibold mb-4 border-b pb-2">1. Identificação</h2>
 
-      <!-- ID Automático -->
-      <div class="mb-4">
-        <label class="block mb-2 text-gray-700 font-semibold">ID Gerado</label>
-        <div id="idGerado" class="p-2 bg-gray-100 border rounded text-gray-700 font-bold"></div>
-      </div>
+      <label class="block mb-2">ID do Responsável</label>
+      <div id="idResp" class="p-2 bg-gray-100 border rounded font-bold"></div>
 
-      <!-- Nome -->
-      <label class="block mb-2 font-medium">Nome</label>
-      <input type="text" name="nome"
-             class="w-full p-2 border rounded mb-4"
-             required>
+      <label class="block mt-4">Nome</label>
+      <input name="nome" class="w-full p-2 border rounded" required>
 
-      <!-- Data de nascimento -->
-      <label class="block mb-2 font-medium">Data de Nascimento</label>
-      <input type="date" name="data_nascimento"
-             class="w-full p-2 border rounded mb-4"
-             required>
+      <label class="block mt-2">Data de Nascimento</label>
+      <input type="date" name="data_nascimento" class="w-full p-2 border rounded" required>
 
-      <!-- CPF -->
-      <label class="block mb-2 font-medium">CPF</label>
-      <input type="text" name="cpf"
-             class="w-full p-2 border rounded mb-4"
-             placeholder="000.000.000-00"
-             required>
+      <label class="block mt-2">CPF</label>
+      <input name="cpf" class="w-full p-2 border rounded" required>
 
-      <!-- RG -->
-      <label class="block mb-2 font-medium">RG</label>
-      <input type="text" name="rg"
-             class="w-full p-2 border rounded"
-             placeholder="000000000"
-             required>
+      <label class="block mt-2">RG</label>
+      <input name="rg" class="w-full p-2 border rounded" required>
     </div>
 
-    <!-- ========================== -->
-    <!-- SEÇÃO 2 — Grau de parentesco -->
-    <!-- ========================== -->
     <div>
-      <h2 class="text-2xl font-semibold mb-4 border-b pb-2">2. Grau de Parentesco</h2>
+      <h2 class="text-xl font-semibold mb-2">IDs vinculados</h2>
 
-      <label class="block mb-2 font-medium">Selecione</label>
-      <select name="parentesco" class="w-full p-2 border rounded" required>
-        <option value="">Selecione</option>
-        <option value="pai">Pai</option>
-        <option value="mãe">Mãe</option>
-        <option value="avô">Avô</option>
-        <option value="avó">Avó</option>
-        <option value="tio">Tio</option>
-        <option value="tia">Tia</option>
-        <option value="irmão">Irmão</option>
-        <option value="irmã">Irmã</option>
-        <option value="primo">Primo</option>
-        <option value="prima">Prima</option>
-        <option value="outros">Outros</option>
-        <option value="denunciante">Denunciante</option>
-      </select>
+      <p id="vinculosBox" class="p-3 bg-blue-100 border rounded text-blue-700 font-bold"></p>
     </div>
 
-    
-    <!-- ========================== -->
-    <!-- SEÇÃO 3 — Contato -->
-    <!-- ========================== -->
-    <div>
-      <h2 class="text-2xl font-semibold mb-4 border-b pb-2">3. Contato</h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block mb-1 font-medium">Telefone</label>
-          <input type="tel" name="telefone"
-                 class="w-full p-2 border rounded"
-                 placeholder="(DDD) 00000-0000" required>
-        </div>
-
-        <div>
-          <label class="block mb-1 font-medium">E-mail</label>
-          <input type="email" name="email"
-                 class="w-full p-2 border rounded"
-                 placeholder="exemplo@email.com" required>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================== -->
-    <!-- SEÇÃO 4 — Criança vinculada -->
-    <!-- ========================== -->
-    <div>
-      <h2 class="text-2xl font-semibold mb-4 border-b pb-2">4. Criança Vinculada</h2>
-
-      <label class="block mb-2 font-medium">ID da Criança (automático)</label>
-
-      <div id="criancaIdBox" class="p-3 bg-blue-100 border border-blue-400 rounded text-blue-700 font-bold"></div>
-
-      <input type="hidden" name="crianca_id" id="crianca_id">
-    </div>
-
-    <!-- ========================== -->
-    <!-- Botão -->
-    <!-- ========================== -->
-    <div class="text-center pt-4">
-      <button type="submit"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition">
-        Salvar Responsável
-      </button>
-    </div>
+    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg">
+      Salvar
+    </button>
 
   </form>
 
-  <!-- ========================== -->
-  <!-- MENSAGEM DE SUCESSO -->
-  <!-- ========================== -->
-  <div id="mensagemSucesso" class="hidden text-center mt-6">
-    <p class="text-green-700 font-bold text-xl mb-4">Cadastro concluído!</p>
-
-    <a href="index.html"
-       class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition text-lg">
-      Voltar à tela inicial
-    </a>
-  </div>
-
 </div>
 
-<!-- ============================= -->
-<!-- JS — ID SEQUENCIAL + Vínculo -->
-<!-- ============================= -->
 <script>
-  function gerarIdSequencial() {
-    let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
-    return lista.length + 1;
-  }
+// ID sequencial responsável
+function gerarIdResp() {
+  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
+  return lista.length + 1;
+}
 
-  document.getElementById("idGerado").innerText = gerarIdSequencial();
+document.getElementById("idResp").innerText = gerarIdResp();
 
+// Recuperar vínculo
+const fluxo = JSON.parse(localStorage.getItem("cadastroAtual"));
 
-  // CARREGAR ÚLTIMA CRIANÇA CADASTRADA
-  const criancas = JSON.parse(localStorage.getItem("criancas") || "[]");
-  if (criancas.length > 0) {
-    const ultima = criancas[criancas.length - 1];
-    document.getElementById("criancaIdBox").innerText =
-      "ID da criança vinculada: " + ultima.id;
-    document.getElementById("crianca_id").value = ultima.id;
-  }
+document.getElementById("vinculosBox").innerText =
+  `Endereço: ${fluxo.enderecoId} | Crianças: ${fluxo.criancaIds.join(", ")}`;
 
-  // FUNÇÃO DE SALVAMENTO
-  document.getElementById("formResponsavel").addEventListener("submit", function (e) {
-    e.preventDefault();
+// Salvamento final
+document.getElementById("formResp").addEventListener("submit", (e) => {
+  e.preventDefault();
 
-    let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
+  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
 
-    const dados = Object.fromEntries(new FormData(this));
+  const novo = Object.fromEntries(new FormData(e.target));
 
-    lista.push(dados);
+  novo.id = gerarIdResp();
+  novo.enderecoId = fluxo.enderecoId;
+  novo.criancaIds = fluxo.criancaIds;
 
-    localStorage.setItem("responsaveis", JSON.stringify(lista));
+  lista.push(novo);
+  localStorage.setItem("responsaveis", JSON.stringify(lista));
 
-    // MOSTRAR MENSAGEM DE SUCESSO
-    document.getElementById("mensagemSucesso").classList.remove("hidden");
+  // Limpa fluxo de cadastro
+  localStorage.removeItem("cadastroAtual");
 
-    // esconder formulário
-    this.classList.add("hidden");
-  });
+  alert("Responsável cadastrado com sucesso!");
+  window.location.href = "index.html";
+});
 </script>
 
 </body>
 </html>
+

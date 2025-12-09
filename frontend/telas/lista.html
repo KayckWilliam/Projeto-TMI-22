@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Lista de Responsáveis</title>
+</head>
+
+<body class="bg-gray-100">
+
+  <div class="container mx-auto p-8">
+
+    <h1 class="text-3xl font-bold mb-8 text-center">Lista de Responsáveis</h1>
+
+    <a href="index.html"
+      class="inline-block mb-6 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+      Voltar
+    </a>
+
+    <!-- Lista -->
+    <div id="listaResponsaveis" class="space-y-6"></div>
+
+  </div>
+
+  <script>
+    function carregarDados() {
+      const responsaveis = JSON.parse(localStorage.getItem("responsaveis")) || [];
+      return responsaveis;
+    }
+
+    function salvarDados(responsaveis) {
+      localStorage.setItem("responsaveis", JSON.stringify(responsaveis));
+    }
+
+    function removerResponsavel(id) {
+      if (!confirm("Tem certeza que deseja excluir este responsável?")) return;
+
+      let responsaveis = carregarDados();
+      responsaveis = responsaveis.filter(r => r.id !== id);
+      salvarDados(responsaveis);
+      render();
+    }
+
+    function removerCrianca(idResponsavel, idCrianca) {
+      if (!confirm("Tem certeza que deseja excluir esta criança?")) return;
+
+      let responsaveis = carregarDados();
+
+      const resp = responsaveis.find(r => r.id === idResponsavel);
+      if (!resp) return;
+
+      resp.criancas = resp.criancas.filter(c => c.id !== idCrianca);
+
+      salvarDados(responsaveis);
+      render();
+    }
+
+    function render() {
+      const container = document.getElementById("listaResponsaveis");
+      const responsaveis = carregarDados();
+
+      if (responsaveis.length === 0) {
+        container.innerHTML = `
+          <p class="text-gray-600 text-center text-lg">Nenhum responsável cadastrado.</p>
+        `;
+        return;
+      }
+
+      container.innerHTML = "";
+
+      responsaveis.forEach(resp => {
+        const card = document.createElement("div");
+        card.className = "bg-white shadow-lg rounded-xl p-6";
+
+        card.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">${resp.nome}</h2>
+            <button onclick="removerResponsavel(${resp.id})"
+              class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+              Excluir Responsável
+            </button>
+          </div>
+
+          <p class="text-gray-700"><strong>ID:</strong> ${resp.id}</p>
+          <p class="text-gray-700"><strong>Telefone:</strong> ${resp.telefone || "Não informado"}</p>
+
+          <h3 class="text-xl font-semibold mt-4 mb-2 border-b pb-1">Crianças</h3>
+
+          <div class="ml-4 space-y-3" id="criancas-${resp.id}">
+            ${resp.criancas && resp.criancas.length > 0 ? "" : "<p class='text-gray-500'>Nenhuma criança vinculada.</p>"}
+          </div>
+        `;
+
+        container.appendChild(card);
+
+        // Renderizar crianças
+        const listaCriancas = document.getElementById(`criancas-${resp.id}`);
+
+        resp.criancas?.forEach(cr => {
+          const child = document.createElement("div");
+          child.className = "flex justify-between items-center bg-gray-100 p-3 rounded";
+
+          child.innerHTML = `
+            <div>
+              <p><strong>${cr.nome}</strong></p>
+              <p class="text-sm text-gray-600">ID: ${cr.id}</p>
+              <p class="text-sm text-gray-600">Nascimento: ${cr.data_nascimento}</p>
+            </div>
+
+            <button onclick="removerCrianca(${resp.id}, ${cr.id})"
+              class="px-3 py-1 bg-red-400 text-white rounded hover:bg-red-500">
+              Excluir
+            </button>
+          `;
+
+          listaCriancas.appendChild(child);
+        });
+      });
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

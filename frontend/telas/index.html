@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -10,28 +11,107 @@
 
   <div class="container mx-auto p-8">
 
-    <h1 class="text-3xl font-bold mb-10 text-center">Sistema de Cadastro</h1>
+    <!-- Cabeçalho com login -->
+    <div class="flex justify-between items-center mb-10">
+      <h1 class="text-3xl font-bold">Sistema de Cadastro</h1>
 
+      <!-- Área de login/logout -->
+      <div id="loginArea"></div>
+    </div>
+
+    <!-- Conteúdo principal -->
     <div class="flex flex-col items-center gap-6 max-w-md mx-auto">
 
       <!-- Botão Cadastro -->
       <a href="cadastro.html"
-         class="w-full text-center p-6 bg-white shadow rounded-xl 
-                hover:bg-blue-50 transition text-xl font-semibold">
+        class="w-full text-center p-6 bg-white shadow rounded-xl 
+               hover:bg-blue-50 transition text-xl font-semibold">
         Cadastro
       </a>
 
       <!-- Botão Relatórios -->
       <a href="relatorios.html"
-         class="w-full text-center p-6 bg-white shadow rounded-xl 
-                hover:bg-green-50 transition text-xl font-semibold">
+        class="w-full text-center p-6 bg-white shadow rounded-xl 
+               hover:bg-green-50 transition text-xl font-semibold">
         Relatórios
       </a>
 
+      <!-- BOTÃO LISTA → só Admin vê -->
+      <a id="btnLista" href="lista.html"
+        class="hidden w-full text-center p-6 bg-white shadow rounded-xl 
+               hover:bg-purple-50 transition text-xl font-semibold">
+        Lista (Admin)
+      </a>
 
     </div>
 
   </div>
+
+  <!-- SCRIPT DE LOGIN / LOGOUT -->
+  <script>
+    function atualizarTela() {
+      const loginArea = document.getElementById("loginArea");
+      const btnLista = document.getElementById("btnLista");
+
+      const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+      if (!usuario) {
+        // Usuário deslogado
+        loginArea.innerHTML = `
+          <button onclick="mostrarTelaLogin()" 
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+            Login
+          </button>
+        `;
+        btnLista.classList.add("hidden");
+        return;
+      }
+
+      // Usuário logado
+      loginArea.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="text-gray-700 font-medium">
+            Olá, ${usuario.nome} (${usuario.nivel})
+          </span>
+
+          <button onclick="logout()" 
+            class="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600">
+            Logout
+          </button>
+        </div>
+      `;
+
+      // Exibir LISTA somente para admin
+      if (usuario.nivel === "admin") {
+        btnLista.classList.remove("hidden");
+      } else {
+        btnLista.classList.add("hidden");
+      }
+    }
+
+    function mostrarTelaLogin() {
+      const nome = prompt("Digite seu nome:");
+      if (!nome) return;
+
+      const nivel = prompt("Digite seu nível de acesso (admin / tecnico):")
+        ?.toLowerCase();
+
+      if (nivel !== "admin" && nivel !== "tecnico") {
+        alert("Nível inválido! Use: admin ou tecnico");
+        return;
+      }
+
+      localStorage.setItem("usuarioLogado", JSON.stringify({ nome, nivel }));
+      atualizarTela();
+    }
+
+    function logout() {
+      localStorage.removeItem("usuarioLogado");
+      atualizarTela();
+    }
+
+    atualizarTela();
+  </script>
 
 </body>
 </html>
