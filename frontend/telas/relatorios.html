@@ -27,6 +27,37 @@
     class="bg-white shadow rounded p-4 mt-4 space-y-2 hidden">
   </ul>
 
+  <!-- ÁREA DO RELATÓRIO -->
+  <div class="bg-white p-6 rounded-lg shadow mt-8">
+
+    <h2 class="text-2xl font-bold mb-4">RELATÓRIO</h2>
+
+    <!-- DATA AUTOMÁTICA -->
+    <input 
+       type="text" 
+       id="dataRelatorio"
+       class="w-60 p-2 border rounded mb-4 bg-gray-100 font-semibold"
+       readonly
+    />
+
+    <!-- TEXTO DO RELATÓRIO -->
+    <textarea
+       id="textoRelatorio"
+       rows="6"
+       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+       placeholder="Digite o relatório aqui..."
+    ></textarea>
+
+    <!-- BOTÃO SALVAR -->
+    <button
+       class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+       onclick="salvarRelatorio()"
+    >
+      Salvar Relatório
+    </button>
+
+  </div>
+
   <!-- BOTÃO VOLTAR -->
   <div class="text-center mt-6">
     <a href="index.html"
@@ -41,8 +72,9 @@
 
 <script>
 let listaCriancas = [];
+let criancaSelecionada = null;
 
-// Carrega todas as crianças ao abrir a página
+// Carrega lista das crianças
 async function carregarCriancas() {
   listaCriancas = await fetch(API.criancas).then(r => r.json());
 }
@@ -70,16 +102,53 @@ function filtrarCriancas() {
     filtradas.forEach(c => {
       ul.innerHTML += `
         <li>
-          <a href="relatorio.html?id=${c.id}"
-            class="block p-2 rounded hover:bg-blue-50 cursor-pointer">
+          <button 
+            onclick="selecionarCrianca(${c.id}, '${c.nome}')"
+            class="block w-full text-left p-2 rounded hover:bg-blue-50 cursor-pointer">
             ${c.nome}
-          </a>
+          </button>
         </li>
       `;
     });
   }
 
   ul.classList.remove("hidden");
+}
+
+// Quando clicar no nome da criança
+function selecionarCrianca(id, nome) {
+  criancaSelecionada = { id, nome };
+  document.getElementById("campoPesquisa").value = nome;
+  document.getElementById("resultadosPesquisa").classList.add("hidden");
+}
+
+// Define automaticamente a data no formato solicitado
+function definirDataAtual() {
+  let hoje = new Date();
+  let dia = String(hoje.getDate()).padStart(2, '0');
+  let mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  let ano = hoje.getFullYear();
+
+  document.getElementById("dataRelatorio").value = `DATA: ${dia}/${mes}/${ano}`;
+}
+
+definirDataAtual();
+
+// Botão salvar
+function salvarRelatorio() {
+  if (!criancaSelecionada) {
+    alert("Selecione uma criança antes de salvar o relatório!");
+    return;
+  }
+
+  const texto = document.getElementById("textoRelatorio").value.trim();
+
+  if (texto.length < 3) {
+    alert("Digite o relatório antes de salvar!");
+    return;
+  }
+
+  alert(`Relatório salvo para: ${criancaSelecionada.nome}`);
 }
 </script>
 
