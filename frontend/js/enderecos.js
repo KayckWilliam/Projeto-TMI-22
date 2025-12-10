@@ -1,11 +1,8 @@
+import { API } from './api.js';
+
 renderHeader();
 
-function gerarIdEndereco() {
-  const lista = JSON.parse(localStorage.getItem("enderecos") || "[]");
-  return lista.length + 1;
-}
-
-document.getElementById("formEndereco").addEventListener("submit", (e) => {
+document.getElementById("formEndereco").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const cep = document.getElementById("cep").value.trim();
@@ -20,19 +17,32 @@ document.getElementById("formEndereco").addEventListener("submit", (e) => {
     return;
   }
 
-  const lista = JSON.parse(localStorage.getItem("enderecos") || "[]");
-  const novoId = gerarIdEndereco();
+  try {
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Salvando...";
 
-  const endereco = { id: novoId, cep, rua, numero, bairro, cidade, estado };
-  lista.push(endereco);
-  localStorage.setItem("enderecos", JSON.stringify(lista));
+    const resultado = await API.create('enderecos', {
+      cep, rua, numero, bairro, cidade, estado
+    });
 
-  localStorage.setItem("cadastroAtual", JSON.stringify({
-    enderecoId: novoId,
-    criancaIds: []
-  }));
+    console.log("Endereço salvo com sucesso:", resultado);
 
-  window.location.href = "criancas.html";
+    localStorage.setItem("cadastroAtual", JSON.stringify({
+      enderecoId: resultado.id,
+      criancaIds: []
+    }));
+
+    console.log("Redirecionando para criancas.html...");
+    window.location.href = "criancas.html";
+  } catch (error) {
+    console.error("Erro ao salvar endereço:", error);
+    const submitBtn = document.querySelector('button[type="submit"]');
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    alert("Erro ao salvar endereço. Tente novamente. Verifique o console para detalhes.");
+  }
 });
 
 

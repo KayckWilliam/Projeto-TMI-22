@@ -1,13 +1,9 @@
+import { API } from './api.js';
+
 renderHeader();
 
 let listaTemp = [];
-
-
-function gerarIdCrianca() {
-  let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
-  return lista.length + 1;
-}
-
+const fluxo = JSON.parse(localStorage.getItem("cadastroAtual") || "{}");
 
 function atualizarListaTemp() {
   const ul = document.getElementById("listaTemp");
@@ -28,12 +24,10 @@ function atualizarListaTemp() {
   });
 }
 
-
 function removerTemp(index) {
   listaTemp.splice(index, 1);
   atualizarListaTemp();
 }
-
 
 document.getElementById("btnAdicionar").addEventListener("click", () => {
   const nome = document.getElementById("nome").value.trim();
@@ -44,35 +38,41 @@ document.getElementById("btnAdicionar").addEventListener("click", () => {
     return;
   }
 
-  const novoId = gerarIdCrianca() + listaTemp.length;
-
-  listaTemp.push({ id: novoId, nome, data_nascimento: data });
-
+  listaTemp.push({ nome, data_nascimento: data });
   atualizarListaTemp();
 
   document.getElementById("nome").value = "";
   document.getElementById("data_nascimento").value = "";
 });
 
-
-document.getElementById("btnSalvarContinuar").addEventListener("click", () => {
+document.getElementById("btnSalvarContinuar").addEventListener("click", async () => {
   if (listaTemp.length === 0) {
     alert("Adicione pelo menos uma criança!");
     return;
   }
 
-  let lista = JSON.parse(localStorage.getItem("criancas") || "[]");
-  lista.push(...listaTemp);
-  localStorage.setItem("criancas", JSON.stringify(lista));
+  try {
+    const criancaIds = [];
+    for (const crianca of listaTemp) {
+      const resultado = await API.create('criancas', {
+        nome: crianca.nome,
+        data_nascimento: crianca.data_nascimento,
+        endereco_id: fluxo.enderecoId || 1
+      });
+      criancaIds.push(resultado.id);
+    }
 
-  let fluxo = JSON.parse(localStorage.getItem("cadastroAtual") || "{}");
-  fluxo.criancaIds = listaTemp.map(c => c.id);
-  localStorage.setItem("cadastroAtual", JSON.stringify(fluxo));
+    fluxo.criancaIds = criancaIds;
+    localStorage.setItem("cadastroAtual", JSON.stringify(fluxo));
 
-  listaTemp = [];
-  atualizarListaTemp();
+    listaTemp = [];
+    atualizarListaTemp();
 
-  window.location.href = "responsaveis.html";
+    window.location.href = "responsaveis.html";
+  } catch (error) {
+    console.error("Erro ao salvar crianças:", error);
+    alert("Erro ao salvar crianças. Tente novamente.");
+  }
 });
 
 

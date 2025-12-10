@@ -1,14 +1,17 @@
 import { MockAPI } from "./mock-api.js";
 
 // Configurar aqui!
-export const USE_MOCK = true;
+export const USE_MOCK = false;
 
 // Caso queira usar backend real futuramente
 const REAL_API = {
   criancas: "http://localhost:8000/criancas",
   responsaveis: "http://localhost:8000/responsaveis",
-  denunciantes: "http://localhost:8000/denunciantes",
-  enderecos: "http://localhost:8000/enderecos"
+  denunciantes: "http://localhost:8000/denunciante",
+  enderecos: "http://localhost:8000/enderecos",
+  filiacao: "http://localhost:8000/filiacao",
+  relatorios: "http://localhost:8000/relatorios",
+  encaminhamentos: "http://localhost:8000/encaminhamentos"
 };
 
 export const API = {

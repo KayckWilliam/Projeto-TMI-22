@@ -1,10 +1,31 @@
+import { API } from './api.js';
+
 renderHeader();
 
-let listaCriancas = JSON.parse(localStorage.getItem("criancas") || "[]");
+let listaCriancas = [];
 let criancaSelecionada = null;
 
 const campoPesquisa = document.getElementById("campoPesquisa");
 const resultadosPesquisa = document.getElementById("resultadosPesquisa");
+
+// Carregar crianças da API ao iniciar
+async function carregarCriancas() {
+  try {
+    listaCriancas = await API.getAll('criancas');
+    console.log("Crianças carregadas:", listaCriancas);
+    
+    if (!listaCriancas || listaCriancas.length === 0) {
+      console.warn("Nenhuma criança encontrada na API");
+    }
+  } catch (error) {
+    console.error("Erro ao carregar crianças:", error);
+    alert("Erro ao carregar crianças. Verifique se o backend está rodando.");
+    listaCriancas = [];
+  }
+}
+
+// Carregar crianças e aguardar conclusão
+await carregarCriancas();
 
 campoPesquisa.addEventListener("input", filtrarCriancas);
 
@@ -44,6 +65,9 @@ function selecionarCrianca(id, nome) {
   resultadosPesquisa.classList.add("hidden");
 }
 
+// Expor funções usadas em atributos inline (HTML usa onclick="...")
+window.selecionarCrianca = selecionarCrianca;
+
 
 function definirDataAtual() {
   let hoje = new Date();
@@ -56,7 +80,7 @@ function definirDataAtual() {
 definirDataAtual();
 
 
-function salvarRelatorio() {
+async function salvarRelatorio() {
   if (!criancaSelecionada) {
     alert("Selecione uma criança antes de salvar o relatório!");
     return;
@@ -68,57 +92,85 @@ function salvarRelatorio() {
     return;
   }
 
-  let relatorios = JSON.parse(localStorage.getItem("relatorios") || "[]");
+  try {
+    const dataValue = document.getElementById("dataRelatorio").value;
+    console.log("Salvando relatório com dados:", {
+      texto,
+      criado_em: dataValue,
+      crianca_id: criancaSelecionada.id
+    });
 
-  relatorios.push({
-    id: Date.now(),
-    criancaId: criancaSelecionada.id,
-    criancaNome: criancaSelecionada.nome,
-    data: document.getElementById("dataRelatorio").value,
-    texto
-  });
+    const resultado = await API.create('relatorios', {
+      texto,
+      criado_em: dataValue,
+      crianca_id: criancaSelecionada.id
+    });
 
-  localStorage.setItem("relatorios", JSON.stringify(relatorios));
-  document.getElementById("textoRelatorio").value = "";
-  carregarRelatorios();
-  alert("Relatório salvo com sucesso!");
+    console.log("Resposta do servidor:", resultado);
+
+    document.getElementById("textoRelatorio").value = "";
+    criancaSelecionada = null;
+    document.getElementById("campoPesquisa").value = "";
+    
+    await carregarRelatorios();
+    alert("Relatório salvo com sucesso!");
+  } catch (error) {
+    console.error("Erro ao salvar relatório:", error);
+    alert("Erro ao salvar relatório. Verifique se o backend está rodando e tente novamente.");
+  }
 }
+// Tornar acessível ao onclick inline
+window.salvarRelatorio = salvarRelatorio;
 
 
-function carregarRelatorios() {
+async function carregarRelatorios() {
   const listaDiv = document.getElementById("listaRelatorios");
-  const relatorios = JSON.parse(localStorage.getItem("relatorios") || "[]");
   const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
   const admin = usuario?.nivel === "admin";
 
-  if (relatorios.length === 0) {
-    listaDiv.innerHTML = `<p class="text-gray-500">Nenhum relatório salvo.</p>`;
-    return;
+  try {
+    const relatorios = await API.getAll('relatorios');
+
+    if (relatorios.length === 0) {
+      listaDiv.innerHTML = `<p class="text-gray-500">Nenhum relatório salvo.</p>`;
+      return;
+    }
+
+    listaDiv.innerHTML = relatorios.map(r => `
+      <div class="p-3 border rounded shadow-sm">
+        <p><strong>Relatório #${r.id}</strong> — Criança ID: ${r.crianca_id}</p>
+        <p><strong>${r.criado_em || 'N/A'}</strong></p>
+        <p class="mt-2">${r.texto}</p>
+
+        ${admin ? `
+        <button 
+          onclick="apagarRelatorio(${r.id})"
+          class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+        >
+          Apagar
+        </button>` : ""}
+      </div>
+    `).join("");
+  } catch (error) {
+    console.error("Erro ao carregar relatórios:", error);
+    listaDiv.innerHTML = `<p class="text-red-500">Erro ao carregar relatórios.</p>`;
   }
-
-  listaDiv.innerHTML = relatorios.map(r => `
-    <div class="p-3 border rounded shadow-sm">
-      <p><strong>Criança:</strong> ${r.criancaNome}</p>
-      <p><strong>${r.data}</strong></p>
-      <p class="mt-2">${r.texto}</p>
-
-      ${admin ? `
-      <button 
-        onclick="apagarRelatorio(${r.id})"
-        class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-      >
-        Apagar
-      </button>` : ""}
-    </div>
-  `).join("");
 }
 carregarRelatorios();
 
 
-function apagarRelatorio(id) {
-  let relatorios = JSON.parse(localStorage.getItem("relatorios") || "[]");
-  relatorios = relatorios.filter(r => r.id !== id);
-  localStorage.setItem("relatorios", JSON.stringify(relatorios));
-  carregarRelatorios();
+async function apagarRelatorio(id) {
+  if (!confirm("Tem certeza que deseja apagar este relatório?")) return;
+
+  try {
+    await API.delete('relatorios', id);
+    carregarRelatorios();
+  } catch (error) {
+    console.error("Erro ao apagar relatório:", error);
+    alert("Erro ao apagar relatório.");
+  }
 }
+
+// Tornar acessível ao onclick inline
+window.apagarRelatorio = apagarRelatorio;
 

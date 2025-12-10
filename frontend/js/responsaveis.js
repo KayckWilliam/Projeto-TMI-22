@@ -1,36 +1,36 @@
+import { API } from './api.js';
+
 renderHeader();
 
 const formResp = document.getElementById("formResp");
 const vinculosBox = document.getElementById("vinculosBox");
 
-function gerarIdResp() {
-  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
-  return lista.length + 1;
-}
-
-
 const fluxo = JSON.parse(localStorage.getItem("cadastroAtual") || "{}");
 
 vinculosBox.innerText = `Endereço vinculado: ${fluxo.enderecoId ? "Sim" : "-"} | Número de crianças: ${fluxo.criancaIds?.length || 0}`;
 
-formResp.addEventListener("submit", (e) => {
+formResp.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  let lista = JSON.parse(localStorage.getItem("responsaveis") || "[]");
+  const dados = Object.fromEntries(new FormData(e.target));
 
-  const novo = Object.fromEntries(new FormData(e.target));
+  try {
+    await API.create('filiacao', {
+      nome: dados.nome,
+      cpf: dados.cpf,
+      rg: dados.rg,
+      telefone: dados.telefone,
+      filiacao: dados.filiacao,
+      crianca_id: fluxo.criancaIds?.[0] || 1
+    });
 
-  novo.id = gerarIdResp();
-  novo.enderecoId = fluxo.enderecoId;
-  novo.criancaIds = fluxo.criancaIds || [];
-
-  lista.push(novo);
-  localStorage.setItem("responsaveis", JSON.stringify(lista));
-
-  localStorage.removeItem("cadastroAtual");
-
-  alert("Responsável cadastrado com sucesso!");
-  window.location.href = "index.html";
+    localStorage.removeItem("cadastroAtual");
+    alert("Responsável cadastrado com sucesso!");
+    window.location.href = "index.html";
+  } catch (error) {
+    console.error("Erro ao salvar responsável:", error);
+    alert("Erro ao salvar responsável. Tente novamente.");
+  }
 });
 
 
