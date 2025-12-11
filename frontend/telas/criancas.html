@@ -21,9 +21,11 @@
 
       <label class="block mb-2">Nome</label>
       <input id="nome" required class="w-full p-2 border rounded mb-4" />
+      <span id="nomeError" class="text-red-500 text-sm hidden">Nome não pode conter números</span>
 
       <label class="block mb-2">Data de Nascimento</label>
-      <input id="data_nascimento" type="date" required class="w-full p-2 border rounded mb-4" />
+      <input id="data_nascimento" type="text" required placeholder="DD/MM/AAAA" maxlength="10" class="w-full p-2 border rounded mb-4" />
+      <span id="dataError" class="text-red-500 text-sm hidden">Data inválida. Use DD/MM/AAAA (entre 1900 e hoje).</span>
 
       <div class="flex justify-between mt-6">
         <button id="btnAdicionar" type="button"

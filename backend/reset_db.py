@@ -12,19 +12,19 @@ db_path = 'ConselhoTutelar.db'
 if os.path.exists(db_path):
     try:
         os.remove(db_path)
-        print(f"❌ Banco de dados antigo removido: {db_path}")
+        print(f" Banco de dados antigo removido: {db_path}")
     except PermissionError:
-        print(f"⚠️  Banco de dados está em uso. Aguardando...")
+        print(f"Banco de dados está em uso. Aguardando...")
         # Tenta novamente após aguardar
         for i in range(5):
             try:
                 os.remove(db_path)
-                print(f"❌ Banco de dados antigo removido após {i+1} tentativa(s): {db_path}")
+                print(f" Banco de dados antigo removido após {i+1} tentativa(s): {db_path}")
                 break
             except PermissionError:
                 time.sleep(1)
         else:
-            print(f"❌ Não foi possível remover o banco. Feche o backend e tente novamente.")
+            print(f"Não foi possível remover o banco. Feche o backend e tente novamente.")
             exit(1)
 
 # Recriar banco de dados com nova estrutura
@@ -63,6 +63,7 @@ class Filiacao(Base):
     cpf = Column('cpf', String)
     rg = Column('rg', String)
     telefone = Column('telefone', String)
+    filiacao = Column('filiacao', String)
     crianca_id = Column('crianca_id', ForeignKey('crianca.id'))
 
 class Denunciante(Base):
@@ -83,5 +84,5 @@ class Encaminhamento(Base):
 
 # Criar todas as tabelas
 Base.metadata.create_all(bind=db)
-print(f"✅ Banco de dados criado com sucesso: {db_path}")
-print("📋 Tabelas criadas: enderecos, crianca, relatorios, filiacao, denunciante, encaminhamentos")
+print(f" Banco de dados criado com sucesso: {db_path}")
+print(" Tabelas criadas: enderecos, crianca, relatorios, filiacao, denunciante, encaminhamentos")

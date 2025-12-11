@@ -1,11 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
+import re
+from datetime import datetime, date
 
-# Database configuration
+# Configuração do banco de dados
 db = create_engine('sqlite:///ConselhoTutelar.db')
 Session = sessionmaker(bind=db)
 session = Session()
@@ -23,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ====== DATABASE MODELS ======
+# ====== Modelos do banco de dados ======
 
 class Endereco(Base):
     __tablename__ = 'enderecos'
@@ -65,13 +67,15 @@ class Filiacao(Base):
     cpf = Column('cpf', String)
     rg = Column('rg', String)
     telefone = Column('telefone', String)
+    filiacao = Column('filiacao', String)
     crianca_id = Column('crianca_id', ForeignKey('crianca.id'))
 
-    def __init__(self, nome, cpf, rg, telefone, crianca_id):
+    def __init__(self, nome, cpf, rg, telefone, filiacao, crianca_id):
         self.nome = nome
         self.cpf = cpf
         self.rg = rg
         self.telefone = telefone
+        self.filiacao = filiacao
         self.crianca_id = crianca_id
 
 class Denunciante(Base):
@@ -118,7 +122,7 @@ class Encaminhamento(Base):
 
 Base.metadata.create_all(bind=db)
 
-# ====== PYDANTIC SCHEMAS ======
+# ====== Esquemas Pydantic ======
 
 class EnderecoSchema(BaseModel):
     id: Optional[int] = None
@@ -129,11 +133,86 @@ class EnderecoSchema(BaseModel):
     cidade: str
     estado: str
 
+    @field_validator('cep')
+    @classmethod
+    def validar_cep(cls, v):
+        # Remove caracteres não numéricos
+        cep_limpo = re.sub(r'\D', '', v)
+        
+        # Verifica se tem exatamente 8 dígitos
+        if len(cep_limpo) != 8:
+            raise ValueError('CEP deve conter exatamente 8 dígitos')
+        
+        # Verifica se não é sequência inválida como 00000000
+        if re.match(r'^0+$', cep_limpo):
+            raise ValueError('CEP inválido')
+        
+        # Verifica se o prefixo está na faixa válida (01000 a 99999)
+        prefixo = int(cep_limpo[:5])
+        if prefixo < 1000:
+            raise ValueError('CEP fora da faixa válida')
+        
+        return v
+    
+    @field_validator('estado')
+    @classmethod
+    def validar_estado(cls, v):
+        estados_validos = [
+            'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+            'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
+            'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+        ]
+        
+        if v.upper() not in estados_validos:
+            raise ValueError(f'Estado inválido. Use uma das siglas: {", ".join(estados_validos)}')
+        
+        return v.upper()
+
 class CriancaSchema(BaseModel):
     id: Optional[int] = None
     nome: str
     data_nascimento: str
     endereco_id: int
+
+    @field_validator('nome')
+    @classmethod
+    def validar_nome(cls, v):
+        # Verifica se contém números
+        if re.search(r'\d', v):
+            raise ValueError('Nome não pode conter números')
+        
+        # Verifica se não está vazio após trim
+        if not v.strip():
+            raise ValueError('Nome não pode estar vazio')
+        
+        return v.strip()
+    
+    @field_validator('data_nascimento')
+    @classmethod
+    def validar_data_nascimento(cls, v):
+        # Verifica formato YYYY-MM-DD
+        if not re.match(r'^\d{4}-\d{2}-\d{2}$', v):
+            raise ValueError('Data deve estar no formato YYYY-MM-DD')
+        
+        try:
+            data = datetime.strptime(v, '%Y-%m-%d').date()
+        except ValueError:
+            raise ValueError('Data inválida')
+        
+        # Verifica se não é data futura
+        if data > date.today():
+            raise ValueError('Data de nascimento não pode ser futura')
+        
+        # Verifica se o ano está entre 1900 e ano atual
+        if data.year < 1900:
+            raise ValueError('Data de nascimento deve ser após 1900')
+        
+        # Verifica idade máxima razoável (ex: 150 anos)
+        idade = (date.today() - data).days // 365
+        if idade > 150:
+            raise ValueError('Data de nascimento inválida')
+        
+        return v
 
 class FiliacaoSchema(BaseModel):
     id: Optional[int] = None
@@ -141,7 +220,64 @@ class FiliacaoSchema(BaseModel):
     cpf: str
     rg: str
     telefone: str
+    filiacao: str
     crianca_id: int
+    
+    @field_validator('nome')
+    def validar_nome(cls, v):
+        if re.search(r'\d', v):
+            raise ValueError('Nome não pode conter números')
+        return v
+    
+    @field_validator('cpf')
+    def validar_cpf(cls, v):
+        # Remove caracteres não numéricos
+        cpf = re.sub(r'\D', '', v)
+        
+        # Verifica se tem 11 dígitos
+        if len(cpf) != 11:
+            raise ValueError('CPF deve ter 11 dígitos')
+        
+        # Verifica se contém apenas números
+        if not cpf.isdigit():
+            raise ValueError('CPF deve conter apenas números')
+        
+        return cpf
+    
+    @field_validator('rg')
+    def validar_rg(cls, v):
+        # Remove caracteres não numéricos
+        rg = re.sub(r'\D', '', v)
+        
+        # Verifica se tem entre 8 e 9 dígitos
+        if not re.match(r'^\d{8,9}$', rg):
+            raise ValueError('RG deve conter apenas números (8 ou 9 dígitos)')
+        
+        return rg
+    
+    @field_validator('telefone')
+    def validar_telefone(cls, v):
+        # Remove caracteres não numéricos
+        telefone = re.sub(r'\D', '', v)
+        
+        # Aceita 11 dígitos (com DDD) ou 9 dígitos (sem DDD)
+        if len(telefone) == 11:
+            # Com DDD: verifica se DDD é válido e terceiro dígito é 9
+            ddd = int(telefone[:2])
+            if ddd < 11 or ddd > 99:
+                raise ValueError('DDD inválido')
+            
+            if telefone[2] != '9':
+                raise ValueError('Telefone celular deve começar com 9 após o DDD')
+            
+        elif len(telefone) == 9:
+            # Sem DDD: primeiro dígito deve ser 9
+            if telefone[0] != '9':
+                raise ValueError('Telefone celular deve começar com 9')
+        else:
+            raise ValueError('Telefone deve ter 11 dígitos (com DDD) ou 9 dígitos (sem DDD)')
+        
+        return telefone
 
 class DenuncianteSchema(BaseModel):
     id: Optional[int] = None
@@ -163,7 +299,7 @@ class EncaminhamentoSchema(BaseModel):
     criado_em: str
     crianca_id: int
 
-# ====== API ENDPOINTS ======
+# ====== Endpoints da API ======
 
 @app.get("/")
 def read_root():
@@ -233,18 +369,18 @@ def delete_crianca(id: int):
 @app.get("/filiacao")
 def get_filiacao():
     filiacao = session.query(Filiacao).all()
-    return [{"id": f.id, "nome": f.nome, "cpf": f.cpf, "rg": f.rg, "telefone": f.telefone, "crianca_id": f.crianca_id} for f in filiacao]
+    return [{"id": f.id, "nome": f.nome, "cpf": f.cpf, "rg": f.rg, "telefone": f.telefone, "filiacao": f.filiacao, "crianca_id": f.crianca_id} for f in filiacao]
 
 @app.get("/filiacao/{id}")
 def get_filiacao_by_id(id: int):
     filiacao = session.query(Filiacao).filter_by(id=id).first()
     if not filiacao:
         return {"error": "Filiacao not found"}, 404
-    return {"id": filiacao.id, "nome": filiacao.nome, "cpf": filiacao.cpf, "rg": filiacao.rg, "telefone": filiacao.telefone, "crianca_id": filiacao.crianca_id}
+    return {"id": filiacao.id, "nome": filiacao.nome, "cpf": filiacao.cpf, "rg": filiacao.rg, "telefone": filiacao.telefone, "filiacao": filiacao.filiacao, "crianca_id": filiacao.crianca_id}
 
 @app.post("/filiacao")
 def create_filiacao(filiacao: FiliacaoSchema):
-    new_filiacao = Filiacao(filiacao.nome, filiacao.cpf, filiacao.rg, filiacao.telefone, filiacao.crianca_id)
+    new_filiacao = Filiacao(filiacao.nome, filiacao.cpf, filiacao.rg, filiacao.telefone, filiacao.filiacao, filiacao.crianca_id)
     session.add(new_filiacao)
     session.commit()
     return {"id": new_filiacao.id, "message": "Filiacao created"}

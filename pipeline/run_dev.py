@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def find_venv_python(backend_dir: Path) -> str:
-    """Return path to venv python if present, otherwise return system python."""
+    """Caminho de retorno para venv python, se presente, caso contrário, retorna o sistema python."""
     win_path = backend_dir / '.venv' / 'Scripts' / 'python.exe'
     unix_path = backend_dir / '.venv' / 'bin' / 'python'
     if win_path.exists():
