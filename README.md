@@ -439,5 +439,5 @@ Exibe estrutura das tabelas e contagem de registros.
 
 **Última atualização:** 11 de dezembro de 2025  
 **Status:** ✅ Funcional - CRUD Completo + Dashboard + Validações + Estatísticas  
-**Desenvolvedor:** Kayck William  
+**Desenvolvedores:** Helmer Araújo, Kayck William, Victor de Souza e Weslley Santos
 **Repositório:** https://github.com/KayckWilliam/Projeto-TMI-22 
