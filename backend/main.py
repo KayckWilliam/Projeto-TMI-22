@@ -121,6 +121,7 @@ class Encaminhamento(Base):
         self.destino = destino
         self.descricao = descricao
         self.crianca_id = crianca_id
+        self.criado_em = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 Base.metadata.create_all(bind=db)
 
@@ -299,7 +300,7 @@ class EncaminhamentoSchema(BaseModel):
     id: Optional[int] = None
     destino: str
     descricao: str
-    criado_em: str
+    criado_em: Optional[str] = None
     crianca_id: int
 
 # ====== Endpoints da API ======
@@ -329,6 +330,22 @@ def create_endereco(endereco: EnderecoSchema):
     session.add(new_endereco)
     session.commit()
     return {"id": new_endereco.id, "message": "Endereco created"}
+
+@app.put("/enderecos/{id}")
+def update_endereco(id: int, endereco: EnderecoSchema):
+    existing_endereco = session.query(Endereco).filter_by(id=id).first()
+    if not existing_endereco:
+        raise HTTPException(status_code=404, detail="Endereco not found")
+    
+    existing_endereco.cep = endereco.cep
+    existing_endereco.rua = endereco.rua
+    existing_endereco.numero = endereco.numero
+    existing_endereco.bairro = endereco.bairro
+    existing_endereco.cidade = endereco.cidade
+    existing_endereco.estado = endereco.estado
+    
+    session.commit()
+    return {"id": existing_endereco.id, "message": "Endereco updated"}
 
 @app.delete("/enderecos/{id}")
 def delete_endereco(id: int):
@@ -388,6 +405,22 @@ def create_filiacao(filiacao: FiliacaoSchema):
     session.commit()
     return {"id": new_filiacao.id, "message": "Filiacao created"}
 
+@app.put("/filiacao/{id}")
+def update_filiacao(id: int, filiacao: FiliacaoSchema):
+    existing_filiacao = session.query(Filiacao).filter_by(id=id).first()
+    if not existing_filiacao:
+        raise HTTPException(status_code=404, detail="Filiacao not found")
+    
+    existing_filiacao.nome = filiacao.nome
+    existing_filiacao.cpf = filiacao.cpf
+    existing_filiacao.rg = filiacao.rg
+    existing_filiacao.telefone = filiacao.telefone
+    existing_filiacao.filiacao = filiacao.filiacao
+    existing_filiacao.crianca_id = filiacao.crianca_id
+    
+    session.commit()
+    return {"id": existing_filiacao.id, "message": "Filiacao updated"}
+
 @app.delete("/filiacao/{id}")
 def delete_filiacao(id: int):
     filiacao = session.query(Filiacao).filter_by(id=id).first()
@@ -445,6 +478,19 @@ def create_relatorio(relatorio: RelatorioSchema):
     session.add(new_relatorio)
     session.commit()
     return {"id": new_relatorio.id, "message": "Relatorio created"}
+
+@app.put("/relatorios/{id}")
+def update_relatorio(id: int, relatorio: RelatorioSchema):
+    existing_relatorio = session.query(Relatorio).filter_by(id=id).first()
+    if not existing_relatorio:
+        raise HTTPException(status_code=404, detail="Relatorio not found")
+    
+    existing_relatorio.texto = relatorio.texto
+    existing_relatorio.crianca_id = relatorio.crianca_id
+    # Mantém a data de criação original, não atualiza criado_em
+    
+    session.commit()
+    return {"id": existing_relatorio.id, "message": "Relatorio updated"}
 
 @app.delete("/relatorios/{id}")
 def delete_relatorio(id: int):
@@ -592,6 +638,27 @@ def get_estatisticas_idades():
     ]
     
     return idades_lista
+
+@app.get("/estatisticas/encaminhamentos")
+def get_estatisticas_encaminhamentos():
+    from sqlalchemy import func
+    
+    # Agrupa e conta por destino de encaminhamento
+    resultado = session.query(
+        Encaminhamento.destino,
+        func.count(Encaminhamento.id).label('quantidade')
+    ).group_by(
+        Encaminhamento.destino
+    ).order_by(
+        func.count(Encaminhamento.id).desc()
+    ).limit(10).all()
+    
+    encaminhamentos_lista = [
+        {"destino": destino, "quantidade": quantidade}
+        for destino, quantidade in resultado
+    ]
+    
+    return encaminhamentos_lista
 
 if __name__ == "__main__":
     import uvicorn

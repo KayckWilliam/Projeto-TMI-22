@@ -21,6 +21,7 @@ async function abrirModal(resp) {
     const criancas = await API.getAll('criancas');
     const enderecos = await API.getAll('enderecos');
     const relatorios = await API.getAll('relatorios');
+    const encaminhamentos = await API.getAll('encaminhamentos');
 
     const crianca = criancas.find(x => x.id == resp.crianca_id);
     const endereco = crianca ? enderecos.find(e => e.id == crianca.endereco_id) : null;
@@ -35,6 +36,18 @@ async function abrirModal(resp) {
           </div>
         `).join('')
       : "<p class='text-gray-500'>Nenhum relatório cadastrado.</p>";
+    
+    // Busca encaminhamentos da criança
+    const encaminhamentosCrianca = crianca ? encaminhamentos.filter(e => e.crianca_id == crianca.id) : [];
+    const listaEncaminhamentos = encaminhamentosCrianca.length > 0
+      ? encaminhamentosCrianca.map(e => `
+          <div class="bg-green-50 p-3 rounded mb-2 border-l-4 border-green-500">
+            <p class="font-semibold text-green-800">${e.destino}</p>
+            <p class="text-sm text-gray-600 mt-1">${e.descricao}</p>
+            <p class="text-xs text-gray-500 mt-1">${e.criado_em}</p>
+          </div>
+        `).join('')
+      : "<p class='text-gray-500'>Nenhum encaminhamento registrado.</p>";
 
     const listaCri = crianca ? `• ${crianca.nome} (nasc: ${crianca.data_nascimento})` : "Nenhuma criança vinculada.";
     const tipoDenuncia = crianca && crianca.denuncia ? crianca.denuncia : "Não informado";
@@ -61,6 +74,9 @@ async function abrirModal(resp) {
 
       <h3 class="text-lg font-semibold mt-4 border-b pb-1">Relatórios</h3>
       ${listaRelatorios}
+      
+      <h3 class="text-lg font-semibold mt-4 border-b pb-1">Encaminhamentos</h3>
+      ${listaEncaminhamentos}
     `;
 
     document.getElementById("modal").classList.remove("hidden");
@@ -74,11 +90,160 @@ function fecharModal() {
   document.getElementById("modal").classList.add("hidden");
 }
 
+let responsavelEditando = null;
+
+// Funções de formatação
+function formatarCPF(valor) {
+  valor = valor.replace(/\D/g, '');
+  if (valor.length <= 11) {
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  }
+  return valor;
+}
+
+function formatarTelefone(valor) {
+  valor = valor.replace(/\D/g, '');
+  if (valor.length <= 11) {
+    valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2');
+    valor = valor.replace(/(\d)(\d{4})$/, '$1-$2');
+  }
+  return valor;
+}
+
+function formatarCEP(valor) {
+  valor = valor.replace(/\D/g, '');
+  if (valor.length <= 8) {
+    valor = valor.replace(/^(\d{5})(\d)/, '$1-$2');
+  }
+  return valor;
+}
+
+function formatarRG(valor) {
+  valor = valor.replace(/\D/g, '');
+  if (valor.length <= 9) {
+    valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  }
+  return valor;
+}
+
+// Função para abrir modal de edição
+async function abrirModalEditar(id) {
+  try {
+    const responsavel = await API.getById('filiacao', id);
+    const crianca = await API.getById('criancas', responsavel.crianca_id);
+    const endereco = await API.getById('enderecos', crianca.endereco_id);
+    
+    responsavelEditando = { ...responsavel, crianca, endereco, endereco_id: crianca.endereco_id };
+    
+    // Preenche os campos do formulário com formatação
+    document.getElementById('editNome').value = responsavel.nome;
+    document.getElementById('editCpf').value = formatarCPF(responsavel.cpf);
+    document.getElementById('editRg').value = formatarRG(responsavel.rg);
+    document.getElementById('editTelefone').value = formatarTelefone(responsavel.telefone);
+    document.getElementById('editFiliacao').value = responsavel.filiacao || '';
+    
+    document.getElementById('editCep').value = formatarCEP(endereco.cep);
+    document.getElementById('editRua').value = endereco.rua;
+    document.getElementById('editNumero').value = endereco.numero;
+    document.getElementById('editBairro').value = endereco.bairro;
+    document.getElementById('editCidade').value = endereco.cidade;
+    document.getElementById('editEstado').value = endereco.estado;
+    
+    // Adiciona listeners para formatação em tempo real
+    const camposCPF = document.getElementById('editCpf');
+    const camposRG = document.getElementById('editRg');
+    const camposTelefone = document.getElementById('editTelefone');
+    const camposCEP = document.getElementById('editCep');
+    
+    camposCPF.addEventListener('input', (e) => {
+      e.target.value = formatarCPF(e.target.value);
+    });
+    
+    camposRG.addEventListener('input', (e) => {
+      e.target.value = formatarRG(e.target.value);
+    });
+    
+    camposTelefone.addEventListener('input', (e) => {
+      e.target.value = formatarTelefone(e.target.value);
+    });
+    
+    camposCEP.addEventListener('input', (e) => {
+      e.target.value = formatarCEP(e.target.value);
+    });
+    
+    document.getElementById('modalEditar').classList.remove('hidden');
+  } catch (error) {
+    console.error('Erro ao carregar dados para edição:', error);
+    alert('Erro ao carregar dados.');
+  }
+}
+
+// Função para fechar modal de edição
+function fecharModalEditar() {
+  document.getElementById('modalEditar').classList.add('hidden');
+  responsavelEditando = null;
+}
+
+// Função para salvar edição
+async function salvarEdicao(e) {
+  e.preventDefault();
+  
+  if (!responsavelEditando) return;
+  
+  // Validações básicas
+  const cpf = document.getElementById('editCpf').value.replace(/\D/g, '');
+  if (cpf.length !== 11) {
+    alert('CPF deve ter 11 dígitos');
+    return;
+  }
+  
+  const cep = document.getElementById('editCep').value.replace(/\D/g, '');
+  if (cep.length !== 8) {
+    alert('CEP deve ter 8 dígitos');
+    return;
+  }
+  
+  try {
+    // Atualiza endereço
+    await API.update('enderecos', responsavelEditando.endereco_id, {
+      cep: document.getElementById('editCep').value,
+      rua: document.getElementById('editRua').value,
+      numero: document.getElementById('editNumero').value,
+      bairro: document.getElementById('editBairro').value,
+      cidade: document.getElementById('editCidade').value,
+      estado: document.getElementById('editEstado').value
+    });
+    
+    // Atualiza responsável (filiacao)
+    await API.update('filiacao', responsavelEditando.id, {
+      nome: document.getElementById('editNome').value,
+      cpf: document.getElementById('editCpf').value,
+      rg: document.getElementById('editRg').value,
+      telefone: document.getElementById('editTelefone').value,
+      filiacao: document.getElementById('editFiliacao').value,
+      crianca_id: responsavelEditando.crianca_id
+    });
+    
+    alert('Dados atualizados com sucesso!');
+    fecharModalEditar();
+    window.location.reload();
+  } catch (error) {
+    console.error('Erro ao salvar:', error);
+    alert('Erro ao salvar os dados.');
+  }
+}
+
 // Expor funções ao escopo global para onclick
 window.removerResponsavel = removerResponsavel;
 window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
 window.filtrarLista = filtrarLista;
+window.abrirModalEditar = abrirModalEditar;
+window.fecharModalEditar = fecharModalEditar;
 
 let todosResponsaveis = [];
 let todasCriancas = [];
@@ -151,10 +316,16 @@ function renderizarLista(responsaveis, criancas) {
           ${r.nome}
         </button>
         
-        <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          onclick="removerResponsavel(${r.id})">
-          Excluir
-        </button>
+        <div class="flex gap-2">
+          <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onclick="abrirModalEditar(${r.id})">
+            Editar
+          </button>
+          <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            onclick="removerResponsavel(${r.id})">
+            Excluir
+          </button>
+        </div>
       </div>
       
       <p class="text-gray-700"><strong>Filiação:</strong> ${r.filiacao || 'Não informado'}</p>
@@ -204,6 +375,12 @@ async function render() {
     console.error("Erro ao renderizar lista:", error);
     container.innerHTML = `<p class="text-red-500">Erro ao carregar responsáveis.</p>`;
   }
+}
+
+// Adiciona listener ao formulário de edição
+const formEditar = document.getElementById('formEditar');
+if (formEditar) {
+  formEditar.addEventListener('submit', salvarEdicao);
 }
 
 render();

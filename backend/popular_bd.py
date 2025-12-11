@@ -4,8 +4,9 @@ Gera 50 cadastros completos automaticamente
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from main import Endereco, Crianca, Filiacao, Base
+from main import Endereco, Crianca, Filiacao, Relatorio, Encaminhamento, Base
 import random
+from datetime import datetime
 
 # Conecta ao banco
 db = create_engine('sqlite:///ConselhoTutelar.db')
@@ -46,6 +47,19 @@ tipos_denuncia = [
     "Alienação parental",
     "Violência institucional (por agentes do Estado)",
     "Discriminação (racismo, LGBTQIA+fobia, preconceito)"
+]
+
+tipos_encaminhamento = [
+    "Ministério Público (MP)",
+    "Vara da Infância e da Juventude (VIJ)",
+    "CRAS (Centro de Referência de Assistência Social)",
+    "CREAS (Centro de Referência Especializado)",
+    "UBS (Unidade Básica de Saúde)",
+    "CAPS (Centro de Atenção Psicossocial)",
+    "Escolas Públicas / Secretaria de Educação",
+    "Defensoria Pública",
+    "Polícia Civil",
+    "Abrigos Institucionais"
 ]
 
 # Gera 50 endereços diferentes
@@ -141,8 +155,39 @@ try:
         session.commit()
         print(f"Responsável {i+1}/50 criado: {resp_data['nome']} ({resp_data['filiacao']})")
     
+    # Insere relatórios para algumas crianças (20 primeiras)
+    relatorios_count = 0
+    for i in range(20):
+        relatorio = Relatorio(
+            texto=f"Relatório de acompanhamento da criança. {random.choice(['Situação estável.', 'Necessita acompanhamento.', 'Evolução positiva.', 'Família colaborativa.'])}",
+            criado_em=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            crianca_id=criancas_ids[i]
+        )
+        session.add(relatorio)
+        session.commit()
+        relatorios_count += 1
+    
+    # Insere encaminhamentos para algumas crianças (30 primeiras)
+    encaminhamentos_count = 0
+    for i in range(30):
+        # Cada criança recebe 1 ou 2 encaminhamentos
+        num_encaminhamentos = random.randint(1, 2)
+        for _ in range(num_encaminhamentos):
+            destino = random.choice(tipos_encaminhamento)
+            encaminhamento = Encaminhamento(
+                destino=destino,
+                descricao=f"Encaminhamento para {destino.split('(')[0].strip()}",
+                crianca_id=criancas_ids[i]
+            )
+            session.add(encaminhamento)
+            session.commit()
+            encaminhamentos_count += 1
+    
+    print(f"\n{relatorios_count} relatórios criados")
+    print(f"{encaminhamentos_count} encaminhamentos criados")
+    
     print("\nBanco de dados populado")
-    print(f"Total: {len(enderecos_ids)} endereços, {len(criancas_ids)} crianças, {len(responsaveis_data)} responsáveis")
+    print(f"Total: {len(enderecos_ids)} endereços, {len(criancas_ids)} crianças, {len(responsaveis_data)} responsáveis, {relatorios_count} relatórios, {encaminhamentos_count} encaminhamentos")
 
 except Exception as e:
     print(f"Erro ao popular banco: {e}")

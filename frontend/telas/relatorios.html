@@ -44,6 +44,33 @@
          placeholder="Digite o relatório aqui..."
       ></textarea>
 
+      <h3 class="text-xl font-semibold mt-6 mb-3">Encaminhamentos</h3>
+      
+      <input 
+        id="buscaEncaminhamento" 
+        type="text" 
+        placeholder="Digite para buscar encaminhamento..." 
+        class="w-full p-2 border rounded mb-2" 
+        autocomplete="off"
+      />
+      
+      <select id="selectEncaminhamento" size="5" class="w-full p-2 border rounded mb-2">
+        <option value="">Selecione os encaminhamentos</option>
+      </select>
+      
+      <button 
+        type="button"
+        onclick="adicionarEncaminhamento()"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 mb-4"
+      >
+        + Adicionar Encaminhamento
+      </button>
+
+      <div id="listaEncaminhamentosSelecionados" class="mb-4">
+        <h4 class="font-semibold mb-2">Encaminhamentos Selecionados:</h4>
+        <ul id="encaminhamentosSelecionados" class="space-y-2"></ul>
+      </div>
+
       <button
          class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
          onclick="salvarRelatorio()"

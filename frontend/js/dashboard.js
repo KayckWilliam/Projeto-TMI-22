@@ -3,6 +3,7 @@ import { API } from './api.js';
 let graficosDenuncias = null;
 let graficosBairros = null;
 let graficosIdades = null;
+let graficosEncaminhamentos = null;
 
 async function carregarDashboard() {
   try {
@@ -11,6 +12,7 @@ async function carregarDashboard() {
     const denuncias = await API.getEstatisticasDenuncias();
     const bairros = await API.getEstatisticasBairros();
     const idades = await API.getEstatisticasIdades();
+    const encaminhamentos = await API.getEstatisticasEncaminhamentos();
     
     // Busca dados para relatórios
     const relatorios = await API.getAll('relatorios');
@@ -29,6 +31,9 @@ async function carregarDashboard() {
 
     // Gera gráfico de idades
     gerarGraficoIdades(idades);
+
+    // Gera gráfico de encaminhamentos
+    gerarGraficoEncaminhamentos(encaminhamentos);
 
     // Lista últimos relatórios
     listarUltimosRelatorios(relatorios, criancas);
@@ -199,6 +204,66 @@ function listarUltimosRelatorios(relatorios, criancas) {
       </div>
     `;
   }).join('');
+}
+
+function gerarGraficoEncaminhamentos(dados) {
+  const ctx = document.getElementById('graficoEncaminhamentos').getContext('2d');
+  
+  // Se já existe gráfico, destrói antes de criar novo
+  if (graficosEncaminhamentos) {
+    graficosEncaminhamentos.destroy();
+  }
+
+  const cores = [
+    '#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5',
+    '#059669', '#047857', '#065F46', '#064E3B', '#022C22'
+  ];
+
+  graficosEncaminhamentos = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: dados.map(d => d.destino),
+      datasets: [{
+        label: 'Quantidade',
+        data: dados.map(d => d.quantidade),
+        backgroundColor: cores,
+        borderColor: cores.map(c => c.replace(')', ', 0.8)').replace('rgb', 'rgba')),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: 'Encaminhamentos mais realizados',
+          font: {
+            size: 16
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        },
+        y: {
+          ticks: {
+            font: {
+              size: 11
+            }
+          }
+        }
+      }
+    }
+  });
 }
 
 // Carrega o dashboard ao abrir a página

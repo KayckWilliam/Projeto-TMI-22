@@ -41,6 +41,16 @@ export const API = {
     return fetch(`${REAL_API[tipo]}/${id}`, {method:"DELETE"});
   },
 
+  async update(tipo, id, data) {
+    if (USE_MOCK) return MockAPI.update(tipo, id, data);
+    
+    return fetch(`${REAL_API[tipo]}/${id}`, {
+      method: "PUT",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(data)
+    }).then(r => r.json());
+  },
+
   async getEstatisticasTotais() {
     return fetch("http://localhost:8000/estatisticas/totais").then(r => r.json());
   },
@@ -55,5 +65,9 @@ export const API = {
 
   async getEstatisticasIdades() {
     return fetch("http://localhost:8000/estatisticas/idades").then(r => r.json());
+  },
+
+  async getEstatisticasEncaminhamentos() {
+    return fetch("http://localhost:8000/estatisticas/encaminhamentos").then(r => r.json());
   }
 };
