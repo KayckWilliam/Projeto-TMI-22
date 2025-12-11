@@ -2,13 +2,14 @@
 
 ## Visão Geral
 
-Sistema de cadastro e gerenciamento de dados para o Conselho Tutelar, com backend em FastAPI e frontend em HTML/CSS/JavaScript. O sistema armazena dados em banco de dados SQLite, garantindo persistência permanente dos registros.
+Sistema full-stack de cadastro e gerenciamento para o Conselho Tutelar, desenvolvido com FastAPI (Python) no backend e JavaScript puro no frontend. O sistema oferece controle completo sobre crianças, responsáveis, endereços, relatórios e encaminhamentos, com dashboard de estatísticas e funcionalidades CRUD completas.
 
 ### Arquitetura
-- **Backend:** FastAPI + SQLAlchemy + SQLite (pasta `backend/`)
-- **Frontend:** HTML/CSS/JavaScript + Express dev server (pasta `frontend/`)
-- **Database:** SQLite (`ConselhoTutelar.db`)
-- **Comunicação:** API REST com proxy de desenvolvimento
+- **Backend:** FastAPI 0.104.1 + SQLAlchemy 2.0.23 + SQLite (pasta `backend/`)
+- **Frontend:** JavaScript ES6 + Tailwind CSS + Chart.js + Express dev server (pasta `frontend/`)
+- **Database:** SQLite (`ConselhoTutelar.db`) com 6 tabelas relacionadas
+- **Comunicação:** API REST com proxy de desenvolvimento (CORS configurado)
+- **Validações:** Pydantic (backend) + máscaras em tempo real (frontend)
 
 ---
 
@@ -46,33 +47,47 @@ Acesse em: http://localhost:3000
 
 ## Funcionalidades
 
-### Cadastro de Dados
-- **Endereços:** CEP, rua, número, bairro, cidade, estado
-- **Crianças:** Nome, data de nascimento, vínculo com endereço
-- **Responsáveis/Guardiões:** Nome, telefone, email, tipo de filiação
-- **Relatórios:** Documentação de casos por criança
-- **Denunciantes:** Registro de quem fez a denúncia
-- **Encaminhamentos:** Registro de ações/encaminhamentos
+### 📝 Cadastro Completo (CRUD)
+- **Endereços:** CEP, rua, número, bairro, cidade, estado (validação de CEP)
+- **Crianças:** Nome, data de nascimento (DD/MM/AAAA), tipo de denúncia (10 opções), vínculo com endereço
+- **Responsáveis:** Nome, CPF, RG, telefone, tipo de filiação (Mãe, Pai, Avó, etc.)
+- **Relatórios:** Texto descritivo vinculado a crianças
+- **Encaminhamentos:** 33 tipos de organizações (Saúde, Educação, Assistência Social, Justiça, Segurança, Outros)
 
-### Busca e Consulta
-- Pesquisar crianças por nome
-- Pesquisar responsáveis por nome
-- Pesquisar endereços por logradouro, bairro ou CEP
-- Visualizar detalhes completos de cada registro
+### 🔍 Busca e Consulta
+- Busca multifuncional: por nome do responsável, CPF ou nome da criança
+- Visualização completa em modal: dados pessoais, endereço, crianças, relatórios e encaminhamentos
+- Lista responsiva com cards estilizados
 
-### Relatórios
-- Criar relatórios vinculados a crianças
-- Visualizar histórico de relatórios
-- Deletar relatórios (admin)
+### ✏️ Edição de Dados
+- Modal de edição completo com todos os campos editáveis
+- Atualização de responsáveis e endereços
+- Máscaras automáticas nos campos (CPF, RG, telefone, CEP)
+- Validações em tempo real
 
-### Usuários e Autenticação
-- Login simples com usuário/senha
-- Dois níveis: admin e usuário
-- Sessão armazenada em localStorage
+### 📊 Dashboard e Estatísticas
+- **Totais:** Crianças cadastradas, responsáveis, relatórios
+- **Gráficos:**
+  - Denúncias por tipo (gráfico de barras)
+  - Top 10 bairros (gráfico de rosca)
+  - Distribuição por faixa etária (0-3, 4-6, 7-10, 11-14, 15-17 anos)
+  - Encaminhamentos mais realizados (gráfico horizontal)
+- Últimos 5 relatórios registrados
+- Estatísticas processadas no backend
+
+### ✅ Validações Implementadas
+- **Nome:** Sem números
+- **Data:** DD/MM/AAAA (validação de mês, dia, ano bissexto, não pode ser futura)
+- **CPF:** 11 dígitos com formatação XXX.XXX.XXX-XX
+- **RG:** 8-9 dígitos com formatação
+- **Telefone:** (XX) 9XXXX-XXXX (validação de DDD brasileiro)
+- **CEP:** XXXXX-XXX
 
 ---
 
 ## Endpoints da API
+
+### CRUD Completo
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
@@ -82,30 +97,65 @@ Acesse em: http://localhost:3000
 | DELETE | `/criancas/{id}` | Deletar criança |
 | GET | `/enderecos` | Listar todos os endereços |
 | POST | `/enderecos` | Criar novo endereço |
+| GET | `/enderecos/{id}` | Obter endereço por ID |
+| **PUT** | `/enderecos/{id}` | **Atualizar endereço** |
 | DELETE | `/enderecos/{id}` | Deletar endereço |
 | GET | `/filiacao` | Listar todos os responsáveis |
 | POST | `/filiacao` | Criar novo responsável |
+| GET | `/filiacao/{id}` | Obter responsável por ID |
+| **PUT** | `/filiacao/{id}` | **Atualizar responsável** |
 | DELETE | `/filiacao/{id}` | Deletar responsável |
 | GET | `/relatorios` | Listar todos os relatórios |
 | POST | `/relatorios` | Criar novo relatório |
+| GET | `/relatorios/{id}` | Obter relatório por ID |
+| **PUT** | `/relatorios/{id}` | **Atualizar relatório** |
 | DELETE | `/relatorios/{id}` | Deletar relatório |
 | GET | `/denunciante` | Listar denunciantes |
 | POST | `/denunciante` | Criar denunciante |
 | GET | `/encaminhamentos` | Listar encaminhamentos |
 | POST | `/encaminhamentos` | Criar encaminhamento |
+| GET | `/encaminhamentos/{id}` | Obter encaminhamento por ID |
+| DELETE | `/encaminhamentos/{id}` | Deletar encaminhamento |
+
+### Estatísticas
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/estatisticas/totais` | Total de crianças, responsáveis e relatórios |
+| GET | `/estatisticas/denuncias` | Agregação por tipo de denúncia |
+| GET | `/estatisticas/bairros` | Top 10 bairros com mais registros |
+| GET | `/estatisticas/idades` | Distribuição por faixa etária |
+| GET | `/estatisticas/encaminhamentos` | Top 10 encaminhamentos mais realizados |
 
 ---
 
 ## Fluxo de Uso
 
-1. **Inicio:** http://localhost:3000 → Login (admin/123456)
-2. **Cadastro:** Clique em "Cadastrar"
-3. **Passo 1:** Preencha endereço e salve
-4. **Passo 2:** Adicione crianças ao endereço
-5. **Passo 3:** Adicione responsáveis/guardiões
-6. **Visualização:** Vá a "Lista" para ver todos os responsáveis cadastrados
-7. **Busca:** Use "Cadastro" para pesquisar qualquer registro
-8. **Relatórios:** Crie e visualize relatórios por criança
+### Cadastro Completo
+1. **Início:** Acesse http://localhost:3000
+2. **Cadastrar Endereço:** Menu "Cadastro" → Preencha CEP, rua, número, bairro, cidade, estado
+3. **Cadastrar Criança(s):** Adicione nome, data de nascimento (DD/MM/AAAA), tipo de denúncia
+4. **Cadastrar Responsável:** Nome, CPF, RG, telefone, tipo de filiação
+5. **Sucesso:** Sistema salva automaticamente e redireciona
+
+### Visualização e Edição
+1. **Lista:** Menu "Lista" → Ver todos os responsáveis cadastrados
+2. **Buscar:** Digite nome, CPF ou nome da criança no campo de busca
+3. **Detalhes:** Clique no nome do responsável para ver modal com informações completas
+4. **Editar:** Clique em "Editar" → Modal com todos os campos editáveis → Salvar
+5. **Excluir:** Botão "Excluir" remove o registro
+
+### Relatórios e Encaminhamentos
+1. **Menu "Relatórios":** Selecione a criança
+2. **Escreva o relatório:** Campo de texto livre
+3. **Adicione Encaminhamentos:** Busque e selecione organizações (até 33 opções)
+4. **Salvar:** Relatório e encaminhamentos são salvos vinculados à criança
+
+### Dashboard
+1. **Menu "Dashboard":** Visualize estatísticas gerais
+2. **Cards:** Totais de crianças, responsáveis e relatórios
+3. **Gráficos:** 4 gráficos interativos (denúncias, bairros, idades, encaminhamentos)
+4. **Últimos Relatórios:** 5 registros mais recentes
 
 ---
 
@@ -141,18 +191,61 @@ npm install
 ```
 
 
+## Estrutura do Projeto
+
+```
+Projeto-TMI-22/
+│
+├── backend/                    # Backend FastAPI
+│   ├── main.py                # API REST (634 linhas) - todos os endpoints
+│   ├── requirements.txt       # FastAPI, SQLAlchemy, Pydantic, Uvicorn
+│   ├── popular_bd.py          # Script para criar 50 registros de teste
+│   ├── reset_db.py            # Recria estrutura do banco
+│   ├── check_db.py            # Verifica integridade do banco
+│   ├── ConselhoTutelar.db     # Banco SQLite (criado automaticamente)
+│   └── .venv/                 # Ambiente virtual Python
+│
+├── frontend/                   # Frontend JavaScript
+│   ├── js/                    # Lógica da aplicação
+│   │   ├── api.js             # Centralizador de chamadas HTTP
+│   │   ├── header.js          # Menu de navegação
+│   │   ├── enderecos.js       # Cadastro de endereços
+│   │   ├── criancas.js        # Cadastro de crianças + denúncias
+│   │   ├── responsaveis.js    # Cadastro de responsáveis (validações)
+│   │   ├── lista.js           # Listagem, busca, edição CRUD
+│   │   ├── relatorios.js      # Relatórios + encaminhamentos
+│   │   └── dashboard.js       # Estatísticas e gráficos Chart.js
+│   ├── telas/                 # Páginas HTML
+│   │   ├── index.html         # Página inicial
+│   │   ├── cadastro.html      # Hub de cadastro
+│   │   ├── enderecos.html
+│   │   ├── criancas.html
+│   │   ├── responsaveis.html
+│   │   ├── lista.html         # Listagem com modal de edição
+│   │   ├── relatorios.html
+│   │   └── dashboard.html     # Dashboard com 4 gráficos
+│   ├── package.json           # Express, http-proxy-middleware
+│   └── server.js              # Servidor dev com proxy (porta 3000→8000)
+│
+├── pipeline/                   # Automação
+│   ├── run_dev.py             # Inicia backend + frontend juntos
+│   └── README.md
+│
+├── README.md                   # Este arquivo
+└── teste.md                    # Documentação técnica completa
+```
+
 ## Arquivos Principais
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `backend/main.py` | API FastAPI com todos os endpoints |
-| `backend/database/config.py` | Configuração do banco de dados SQLAlchemy |
-| `backend/requirements.txt` | Dependências Python |
-| `frontend/js/api.js` | Camada de abstração para chamadas HTTP |
-| `frontend/js/server.js` | Servidor Express com proxy middleware |
-| `frontend/telas/*.html` | Páginas HTML do sistema |
-| `frontend/js/*.js` | Lógica das páginas |
-| `pipeline/run_dev.py` | Script para iniciar ambos os servidores |
+| Arquivo | Linhas | Descrição |
+|---------|--------|-----------|
+| `backend/main.py` | 634 | API REST completa, modelos SQLAlchemy, schemas Pydantic, endpoints CRUD e estatísticas |
+| `frontend/js/lista.js` | 315 | Listagem, busca, modal de visualização, modal de edição, validações |
+| `frontend/js/responsaveis.js` | 240 | Validações completas (CPF, RG, telefone, data), máscaras em tempo real |
+| `frontend/js/criancas.js` | 214 | Cadastro de crianças, validação de data, dropdown de denúncias com busca |
+| `frontend/js/dashboard.js` | 260 | 4 gráficos Chart.js, cards de totais, lista de últimos relatórios |
+| `frontend/js/relatorios.js` | 200+ | Criação de relatórios, sistema de encaminhamentos (33 organizações) |
+| `backend/popular_bd.py` | 150+ | Popula banco com 50 crianças, responsáveis, 20 relatórios, encaminhamentos |
 
 ---
 
@@ -181,13 +274,73 @@ npm install
 
 ## Estrutura do Banco de Dados
 
-Tabelas:
-- **endereco** — Endereços
-- **crianca** — Crianças cadastradas
-- **filiacao** — Responsáveis/Guardiões
-- **denunciante** — Denunciantes
-- **relatorio** — Relatórios de casos
-- **encaminhamento** — Encaminhamentos
+### Modelo de Dados (SQLite)
+
+```
+┌──────────────┐
+│  enderecos   │
+├──────────────┤
+│ id (PK)      │
+│ cep          │
+│ rua          │
+│ numero       │
+│ bairro       │
+│ cidade       │
+│ estado       │
+└──────┬───────┘
+       │ 1:N
+       ▼
+┌──────────────┐
+│   crianca    │
+├──────────────┤
+│ id (PK)      │◄─────┐
+│ nome         │      │
+│ data_nasc    │      │ N:1
+│ endereco_id  │      │
+│ denuncia     │      │
+└──────┬───────┘      │
+       │              │
+       │ 1:N          │
+       ├──────────────┤
+       │              │
+       ▼              │
+┌──────────────┐      │
+│  filiacao    │──────┘
+│ (responsável)│
+├──────────────┤
+│ id (PK)      │
+│ nome         │
+│ cpf          │
+│ rg           │
+│ telefone     │
+│ filiacao     │
+│ crianca_id   │
+└──────────────┘
+       │
+       │ 1:N
+       ├──────────────┬──────────────┐
+       ▼              ▼              ▼
+┌──────────────┐ ┌────────────┐ ┌──────────────┐
+│  relatorios  │ │denunciante │ │encaminhamento│
+├──────────────┤ ├────────────┤ ├──────────────┤
+│ id (PK)      │ │ id (PK)    │ │ id (PK)      │
+│ texto        │ │ nome       │ │ destino      │
+│ criado_em    │ │ parentesco │ │ descricao    │
+│ crianca_id   │ │ telefone   │ │ criado_em    │
+└──────────────┘ │ crianca_id │ │ crianca_id   │
+                 └────────────┘ └──────────────┘
+```
+
+### Tabelas
+
+| Tabela | Registros | Descrição |
+|--------|-----------|-----------|
+| `enderecos` | - | CEP, rua, número, bairro, cidade, estado |
+| `crianca` | - | Nome, data_nascimento, endereco_id (FK), denuncia |
+| `filiacao` | - | Responsáveis: nome, CPF, RG, telefone, filiacao, crianca_id (FK) |
+| `relatorios` | - | Texto, criado_em, crianca_id (FK) |
+| `encaminhamentos` | - | Destino, descrição, criado_em, crianca_id (FK) |
+| `denunciante` | - | Nome, parentesco, telefone, crianca_id (FK) |
 
 ---
 
@@ -199,16 +352,92 @@ Tabelas:
 
 ---
 
-## Próximas Melhorias
+## Utilitários do Projeto
 
-- [ ] Autenticação com token JWT
-- [ ] Dashboard com gráficos de estatísticas
-- [ ] Export de dados para Excel/PDF
-- [ ] Notificações por email
-- [ ] Sistema de permissões granulares
-- [ ] Histórico de alterações (auditoria)
+### Popular Banco de Dados
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+python popular_bd.py
+```
+Cria automaticamente:
+- 50 crianças com nomes e datas variadas
+- 50 responsáveis com CPFs, RGs e telefones
+- 50 endereços distribuídos por 10 bairros
+- 20 relatórios para as primeiras 20 crianças
+- 30-60 encaminhamentos variados
+- 10 tipos diferentes de denúncias
+
+### Resetar Banco de Dados
+```powershell
+python reset_db.py
+```
+Deleta e recria todas as tabelas (perde todos os dados).
+
+### Verificar Banco
+```powershell
+python check_db.py
+```
+Exibe estrutura das tabelas e contagem de registros.
 
 ---
 
-**Última atualização:** 10 de dezembro de 2025  
-**Status:** Funcional - Backend + Frontend + Persistência de Dados 
+## Tecnologias e Bibliotecas
+
+### Backend
+- **Python 3.11**
+- **FastAPI 0.104.1** - Framework web moderno e rápido
+- **SQLAlchemy 2.0.23** - ORM para Python
+- **Pydantic** - Validação de dados
+- **Uvicorn** - Servidor ASGI
+- **SQLite 3** - Banco de dados embutido
+
+### Frontend
+- **JavaScript ES6** - Módulos nativos
+- **Tailwind CSS** - Framework CSS via CDN
+- **Chart.js** - Biblioteca de gráficos
+- **Express 5.1.0** - Servidor de desenvolvimento
+- **http-proxy-middleware** - Proxy para evitar CORS
+
+---
+
+## Funcionalidades Implementadas
+
+✅ CRUD completo para todas as entidades (Create, Read, Update, Delete)  
+✅ Validações completas de CPF, RG, telefone, CEP, datas  
+✅ Máscaras automáticas em tempo real  
+✅ Sistema de busca multifuncional  
+✅ Modal de visualização detalhada  
+✅ Modal de edição com todos os campos  
+✅ Dashboard com 4 gráficos interativos  
+✅ Estatísticas processadas no backend  
+✅ Sistema de encaminhamentos (33 organizações)  
+✅ Tipos de denúncia (10 opções)  
+✅ Persistência em banco SQLite  
+✅ API REST documentada (Swagger)  
+✅ Script de população automática  
+✅ Proxy de desenvolvimento configurado  
+
+---
+
+## Melhorias Futuras
+
+- [ ] Sistema de autenticação com JWT
+- [ ] Controle de acesso por níveis (admin/usuário)
+- [ ] Exportação de relatórios em PDF (ReportLab)
+- [ ] Paginação nas listagens
+- [ ] Filtros de data no dashboard
+- [ ] Validação de CPF com dígitos verificadores
+- [ ] Sistema de anexos (upload de arquivos)
+- [ ] Notificações por email/SMS
+- [ ] Histórico de alterações (audit log)
+- [ ] Testes automatizados (pytest, Jest)
+- [ ] Migração para PostgreSQL (produção)
+- [ ] Deploy com Docker
+
+---
+
+**Última atualização:** 11 de dezembro de 2025  
+**Status:** ✅ Funcional - CRUD Completo + Dashboard + Validações + Estatísticas  
+**Desenvolvedor:** Kayck William  
+**Repositório:** https://github.com/KayckWilliam/Projeto-TMI-22 
