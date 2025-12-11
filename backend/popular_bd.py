@@ -12,7 +12,7 @@ db = create_engine('sqlite:///ConselhoTutelar.db')
 Session = sessionmaker(bind=db)
 session = Session()
 
-print("Populando banco de dados com 50 cadastros...")
+print("Populando banco de dados")
 
 # Listas de nomes para gerar dados variados
 nomes_masculinos = ["João", "Pedro", "Lucas", "Gabriel", "Rafael", "Carlos", "Fernando", "Ricardo", "Roberto", "Antonio", 
@@ -34,6 +34,19 @@ bairros = ["Centro", "Chapada", "Adrianópolis", "Aleixo", "Flores", "Parque 10"
            "São Francisco", "Coroado", "Cidade Nova", "Compensa", "São Jorge", "Tarumã", "Japiim", "Petrópolis"]
 
 filiacao_tipos = ["pai", "mãe", "avô", "avó", "tio", "tia"]
+
+tipos_denuncia = [
+    "Violência física (agressões, lesões corporais)",
+    "Violência psicológica (ameaças, humilhação, bullying)",
+    "Abuso sexual (estupro de vulnerável, assédio sexual)",
+    "Exploração sexual (prostituição, pornografia infantil)",
+    "Negligência (abandono material, falta de cuidados básicos)",
+    "Trabalho infantil (exploração laboral)",
+    "Tráfico de crianças e adolescentes",
+    "Alienação parental",
+    "Violência institucional (por agentes do Estado)",
+    "Discriminação (racismo, LGBTQIA+fobia, preconceito)"
+]
 
 # Gera 50 endereços diferentes
 enderecos_data = []
@@ -59,7 +72,8 @@ for i in range(50):
     
     criancas_data.append({
         "nome": f"{nome} {sobrenome}",
-        "data_nascimento": f"{ano}-{mes:02d}-{dia:02d}"
+        "data_nascimento": f"{ano}-{mes:02d}-{dia:02d}",
+        "denuncia": random.choice(tipos_denuncia)
     })
 
 # Gera 50 responsáveis
@@ -105,7 +119,8 @@ try:
         crianca = Crianca(
             nome=cri_data["nome"],
             data_nascimento=cri_data["data_nascimento"],
-            endereco=enderecos_ids[i]
+            endereco=enderecos_ids[i],
+            denuncia=cri_data["denuncia"]
         )
         session.add(crianca)
         session.commit()
@@ -126,7 +141,7 @@ try:
         session.commit()
         print(f"Responsável {i+1}/50 criado: {resp_data['nome']} ({resp_data['filiacao']})")
     
-    print("\nBanco de dados populado com sucesso!")
+    print("\nBanco de dados populado")
     print(f"Total: {len(enderecos_ids)} endereços, {len(criancas_ids)} crianças, {len(responsaveis_data)} responsáveis")
 
 except Exception as e:

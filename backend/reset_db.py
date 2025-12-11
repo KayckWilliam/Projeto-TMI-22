@@ -48,6 +48,7 @@ class Crianca(Base):
     nome = Column('nome', String)
     data_nascimento = Column('data_nascimento', String)
     endereco_id = Column('endereco_id', ForeignKey('enderecos.id'))
+    denuncia = Column('denuncia', String)
 
 class Relatorio(Base):
     __tablename__ = 'relatorios'

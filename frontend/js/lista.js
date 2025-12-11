@@ -37,6 +37,7 @@ async function abrirModal(resp) {
       : "<p class='text-gray-500'>Nenhum relatório cadastrado.</p>";
 
     const listaCri = crianca ? `• ${crianca.nome} (nasc: ${crianca.data_nascimento})` : "Nenhuma criança vinculada.";
+    const tipoDenuncia = crianca && crianca.denuncia ? crianca.denuncia : "Não informado";
 
     document.getElementById("modalContent").innerHTML = `
       <p><strong>Nome:</strong> ${resp.nome}</p>
@@ -54,6 +55,9 @@ async function abrirModal(resp) {
 
       <h3 class="text-lg font-semibold mt-4 border-b pb-1">Criança</h3>
       <p>${listaCri}</p>
+      
+      <h3 class="text-lg font-semibold mt-4 border-b pb-1">Tipo de Denúncia</h3>
+      <p>${tipoDenuncia}</p>
 
       <h3 class="text-lg font-semibold mt-4 border-b pb-1">Relatórios</h3>
       ${listaRelatorios}

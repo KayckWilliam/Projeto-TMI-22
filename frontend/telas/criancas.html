@@ -27,6 +27,22 @@
       <input id="data_nascimento" type="text" required placeholder="DD/MM/AAAA" maxlength="10" class="w-full p-2 border rounded mb-4" />
       <span id="dataError" class="text-red-500 text-sm hidden">Data inválida. Use DD/MM/AAAA (entre 1900 e hoje).</span>
 
+      <label class="block mb-2">Tipo de Denúncia</label>
+      <input id="denunciaBusca" type="text" placeholder="Digite para buscar..." class="w-full p-2 border rounded mb-2" autocomplete="off" />
+      <select id="denuncia" required class="w-full p-2 border rounded mb-4">
+        <option value="">Selecione o tipo de denúncia</option>
+        <option value="Violência física (agressões, lesões corporais)">Violência física (agressões, lesões corporais)</option>
+        <option value="Violência psicológica (ameaças, humilhação, bullying)">Violência psicológica (ameaças, humilhação, bullying)</option>
+        <option value="Abuso sexual (estupro de vulnerável, assédio sexual)">Abuso sexual (estupro de vulnerável, assédio sexual)</option>
+        <option value="Exploração sexual (prostituição, pornografia infantil)">Exploração sexual (prostituição, pornografia infantil)</option>
+        <option value="Negligência (abandono material, falta de cuidados básicos)">Negligência (abandono material, falta de cuidados básicos)</option>
+        <option value="Trabalho infantil (exploração laboral)">Trabalho infantil (exploração laboral)</option>
+        <option value="Tráfico de crianças e adolescentes">Tráfico de crianças e adolescentes</option>
+        <option value="Alienação parental">Alienação parental</option>
+        <option value="Violência institucional (por agentes do Estado)">Violência institucional (por agentes do Estado)</option>
+        <option value="Discriminação (racismo, LGBTQIA+fobia, preconceito)">Discriminação (racismo, LGBTQIA+fobia, preconceito)</option>
+      </select>
+
       <div class="flex justify-between mt-6">
         <button id="btnAdicionar" type="button"
           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">

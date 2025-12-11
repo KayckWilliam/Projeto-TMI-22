@@ -39,5 +39,21 @@ export const API = {
   async delete(tipo, id) {
     if (USE_MOCK) return MockAPI.delete(tipo, id);
     return fetch(`${REAL_API[tipo]}/${id}`, {method:"DELETE"});
+  },
+
+  async getEstatisticasTotais() {
+    return fetch("http://localhost:8000/estatisticas/totais").then(r => r.json());
+  },
+
+  async getEstatisticasDenuncias() {
+    return fetch("http://localhost:8000/estatisticas/denuncias").then(r => r.json());
+  },
+
+  async getEstatisticasBairros() {
+    return fetch("http://localhost:8000/estatisticas/bairros").then(r => r.json());
+  },
+
+  async getEstatisticasIdades() {
+    return fetch("http://localhost:8000/estatisticas/idades").then(r => r.json());
   }
 };

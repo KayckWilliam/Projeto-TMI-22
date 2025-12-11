@@ -88,6 +88,32 @@ campoData.addEventListener("input", (e) => {
   document.getElementById("dataError").classList.add("hidden");
 });
 
+// Implementa busca no dropdown de denúncia
+const campoDenunciaBusca = document.getElementById("denunciaBusca");
+const selectDenuncia = document.getElementById("denuncia");
+const todasOpcoesDenuncia = Array.from(selectDenuncia.options).slice(1); // Remove a primeira opção vazia
+
+campoDenunciaBusca.addEventListener("input", (e) => {
+  const termoBusca = e.target.value.toLowerCase();
+  
+  // Remove todas as opções exceto a primeira
+  selectDenuncia.innerHTML = '<option value="">Selecione o tipo de denúncia</option>';
+  
+  // Filtra e adiciona opções que correspondem à busca
+  todasOpcoesDenuncia.forEach(opcao => {
+    if (opcao.text.toLowerCase().includes(termoBusca)) {
+      selectDenuncia.appendChild(opcao.cloneNode(true));
+    }
+  });
+});
+
+// Quando selecionar no dropdown, atualiza o campo de busca
+selectDenuncia.addEventListener("change", (e) => {
+  if (e.target.value) {
+    campoDenunciaBusca.value = e.target.value;
+  }
+});
+
 function atualizarListaTemp() {
   const ul = document.getElementById("listaTemp");
   ul.innerHTML = "";
@@ -97,8 +123,9 @@ function atualizarListaTemp() {
     li.className = "p-3 bg-gray-100 rounded flex justify-between items-center";
 
     const dataBR = converterDataParaBR(c.data_nascimento);
+    const denunciaResumida = c.denuncia ? c.denuncia.split('(')[0].trim() : 'Sem denúncia';
     li.innerHTML = `
-      <span>${c.nome} (nasc: ${dataBR})</span>
+      <span>${c.nome} (nasc: ${dataBR}) - ${denunciaResumida}</span>
       <button onclick="removerTemp(${index})"
         class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
         Remover
@@ -119,8 +146,9 @@ window.removerTemp = removerTemp;
 document.getElementById("btnAdicionar").addEventListener("click", () => {
   const nome = document.getElementById("nome").value.trim();
   const data = document.getElementById("data_nascimento").value;
+  const denuncia = document.getElementById("denuncia").value;
 
-  if (!nome || !data) {
+  if (!nome || !data || !denuncia) {
     alert("Preencha todos os campos!");
     return;
   }
@@ -139,11 +167,13 @@ document.getElementById("btnAdicionar").addEventListener("click", () => {
     return;
   }
 
-  listaTemp.push({ nome, data_nascimento: converterDataParaISO(data) });
+  listaTemp.push({ nome, data_nascimento: converterDataParaISO(data), denuncia });
   atualizarListaTemp();
 
   document.getElementById("nome").value = "";
   document.getElementById("data_nascimento").value = "";
+  document.getElementById("denuncia").value = "";
+  campoDenunciaBusca.value = "";
 });
 
 document.getElementById("btnSalvarContinuar").addEventListener("click", async () => {
@@ -158,7 +188,8 @@ document.getElementById("btnSalvarContinuar").addEventListener("click", async ()
       const resultado = await API.create('criancas', {
         nome: crianca.nome,
         data_nascimento: crianca.data_nascimento,
-        endereco_id: fluxo.enderecoId || 1
+        endereco_id: fluxo.enderecoId || 1,
+        denuncia: crianca.denuncia
       });
       criancaIds.push(resultado.id);
     }

@@ -53,11 +53,13 @@ class Crianca(Base):
     nome = Column('nome', String)
     data_nascimento = Column('data_nascimento', String)
     endereco_id = Column('endereco_id', ForeignKey('enderecos.id'))
+    denuncia = Column('denuncia', String)
 
-    def __init__(self, nome, data_nascimento, endereco):
+    def __init__(self, nome, data_nascimento, endereco, denuncia=None):
         self.nome = nome
         self.data_nascimento = data_nascimento
         self.endereco_id = endereco
+        self.denuncia = denuncia
 
 class Filiacao(Base):
     __tablename__ = 'filiacao'
@@ -173,6 +175,7 @@ class CriancaSchema(BaseModel):
     nome: str
     data_nascimento: str
     endereco_id: int
+    denuncia: Optional[str] = None
 
     @field_validator('nome')
     @classmethod
@@ -340,18 +343,18 @@ def delete_endereco(id: int):
 @app.get("/criancas")
 def get_criancas():
     criancas = session.query(Crianca).all()
-    return [{"id": c.id, "nome": c.nome, "data_nascimento": c.data_nascimento, "endereco_id": c.endereco_id} for c in criancas]
+    return [{"id": c.id, "nome": c.nome, "data_nascimento": c.data_nascimento, "endereco_id": c.endereco_id, "denuncia": c.denuncia} for c in criancas]
 
 @app.get("/criancas/{id}")
 def get_crianca(id: int):
     crianca = session.query(Crianca).filter_by(id=id).first()
     if not crianca:
         return {"error": "Crianca not found"}, 404
-    return {"id": crianca.id, "nome": crianca.nome, "data_nascimento": crianca.data_nascimento, "endereco_id": crianca.endereco_id}
+    return {"id": crianca.id, "nome": crianca.nome, "data_nascimento": crianca.data_nascimento, "endereco_id": crianca.endereco_id, "denuncia": crianca.denuncia}
 
 @app.post("/criancas")
 def create_crianca(crianca: CriancaSchema):
-    new_crianca = Crianca(crianca.nome, crianca.data_nascimento, crianca.endereco_id)
+    new_crianca = Crianca(crianca.nome, crianca.data_nascimento, crianca.endereco_id, crianca.denuncia)
     session.add(new_crianca)
     session.commit()
     return {"id": new_crianca.id, "message": "Crianca created"}
@@ -480,6 +483,115 @@ def delete_encaminhamento(id: int):
     session.delete(encaminhamento)
     session.commit()
     return {"message": "Encaminhamento deleted"}
+
+# Estatisticas
+@app.get("/estatisticas/totais")
+def get_estatisticas_totais():
+    total_criancas = session.query(Crianca).count()
+    total_responsaveis = session.query(Filiacao).count()
+    total_relatorios = session.query(Relatorio).count()
+    
+    return {
+        "total_criancas": total_criancas,
+        "total_responsaveis": total_responsaveis,
+        "total_relatorios": total_relatorios
+    }
+
+@app.get("/estatisticas/denuncias")
+def get_estatisticas_denuncias():
+    from sqlalchemy import func
+    
+    # Agrupa e conta por tipo de denúncia
+    resultado = session.query(
+        Crianca.denuncia,
+        func.count(Crianca.id).label('quantidade')
+    ).filter(
+        Crianca.denuncia.isnot(None)
+    ).group_by(
+        Crianca.denuncia
+    ).order_by(
+        func.count(Crianca.id).desc()
+    ).all()
+    
+    # Simplifica o tipo de denúncia (remove o que está entre parênteses)
+    denuncias_agrupadas = {}
+    for denuncia, quantidade in resultado:
+        tipo_simples = denuncia.split('(')[0].strip()
+        denuncias_agrupadas[tipo_simples] = denuncias_agrupadas.get(tipo_simples, 0) + quantidade
+    
+    # Converte para lista ordenada
+    denuncias_lista = [
+        {"tipo": tipo, "quantidade": qtd}
+        for tipo, qtd in sorted(denuncias_agrupadas.items(), key=lambda x: x[1], reverse=True)
+    ]
+    
+    return denuncias_lista
+
+@app.get("/estatisticas/bairros")
+def get_estatisticas_bairros():
+    from sqlalchemy import func
+    
+    # Agrupa crianças por bairro através do endereço
+    resultado = session.query(
+        Endereco.bairro,
+        func.count(Crianca.id).label('quantidade')
+    ).join(
+        Crianca, Crianca.endereco_id == Endereco.id
+    ).group_by(
+        Endereco.bairro
+    ).order_by(
+        func.count(Crianca.id).desc()
+    ).limit(10).all()
+    
+    bairros_lista = [
+        {"bairro": bairro, "quantidade": quantidade}
+        for bairro, quantidade in resultado
+    ]
+    
+    return bairros_lista
+
+@app.get("/estatisticas/idades")
+def get_estatisticas_idades():
+    from datetime import datetime
+    
+    criancas = session.query(Crianca).all()
+    
+    # Calcula idade de cada criança e agrupa por faixa etária
+    faixas = {
+        "0-3 anos": 0,
+        "4-6 anos": 0,
+        "7-10 anos": 0,
+        "11-14 anos": 0,
+        "15-17 anos": 0
+    }
+    
+    hoje = datetime.now()
+    
+    for crianca in criancas:
+        try:
+            # Converte string YYYY-MM-DD para datetime
+            data_nasc = datetime.strptime(crianca.data_nascimento, '%Y-%m-%d')
+            idade = hoje.year - data_nasc.year - ((hoje.month, hoje.day) < (data_nasc.month, data_nasc.day))
+            
+            if idade <= 3:
+                faixas["0-3 anos"] += 1
+            elif idade <= 6:
+                faixas["4-6 anos"] += 1
+            elif idade <= 10:
+                faixas["7-10 anos"] += 1
+            elif idade <= 14:
+                faixas["11-14 anos"] += 1
+            elif idade <= 17:
+                faixas["15-17 anos"] += 1
+        except:
+            continue
+    
+    idades_lista = [
+        {"faixa": faixa, "quantidade": quantidade}
+        for faixa, quantidade in faixas.items()
+    ]
+    
+    return idades_lista
 
 if __name__ == "__main__":
     import uvicorn
