@@ -47,25 +47,25 @@ Acesse em: http://localhost:3000
 
 ## Funcionalidades
 
-### 📝 Cadastro Completo (CRUD)
+### Cadastro Completo (CRUD)
 - **Endereços:** CEP, rua, número, bairro, cidade, estado (validação de CEP)
 - **Crianças:** Nome, data de nascimento (DD/MM/AAAA), tipo de denúncia (10 opções), vínculo com endereço
 - **Responsáveis:** Nome, CPF, RG, telefone, tipo de filiação (Mãe, Pai, Avó, etc.)
 - **Relatórios:** Texto descritivo vinculado a crianças
 - **Encaminhamentos:** 33 tipos de organizações (Saúde, Educação, Assistência Social, Justiça, Segurança, Outros)
 
-### 🔍 Busca e Consulta
+### Busca e Consulta
 - Busca multifuncional: por nome do responsável, CPF ou nome da criança
 - Visualização completa em modal: dados pessoais, endereço, crianças, relatórios e encaminhamentos
 - Lista responsiva com cards estilizados
 
-### ✏️ Edição de Dados
+### Edição de Dados
 - Modal de edição completo com todos os campos editáveis
 - Atualização de responsáveis e endereços
 - Máscaras automáticas nos campos (CPF, RG, telefone, CEP)
 - Validações em tempo real
 
-### 📊 Dashboard e Estatísticas
+### Dashboard e Estatísticas
 - **Totais:** Crianças cadastradas, responsáveis, relatórios
 - **Gráficos:**
   - Denúncias por tipo (gráfico de barras)
@@ -75,7 +75,7 @@ Acesse em: http://localhost:3000
 - Últimos 5 relatórios registrados
 - Estatísticas processadas no backend
 
-### ✅ Validações Implementadas
+### Validações Implementadas
 - **Nome:** Sem números
 - **Data:** DD/MM/AAAA (validação de mês, dia, ano bissexto, não pode ser futura)
 - **CPF:** 11 dígitos com formatação XXX.XXX.XXX-XX
@@ -403,20 +403,20 @@ Exibe estrutura das tabelas e contagem de registros.
 
 ## Funcionalidades Implementadas
 
-✅ CRUD completo para todas as entidades (Create, Read, Update, Delete)  
-✅ Validações completas de CPF, RG, telefone, CEP, datas  
-✅ Máscaras automáticas em tempo real  
-✅ Sistema de busca multifuncional  
-✅ Modal de visualização detalhada  
-✅ Modal de edição com todos os campos  
-✅ Dashboard com 4 gráficos interativos  
-✅ Estatísticas processadas no backend  
-✅ Sistema de encaminhamentos (33 organizações)  
-✅ Tipos de denúncia (10 opções)  
-✅ Persistência em banco SQLite  
-✅ API REST documentada (Swagger)  
-✅ Script de população automática  
-✅ Proxy de desenvolvimento configurado  
+- CRUD completo para todas as entidades (Create, Read, Update, Delete)  
+- Validações completas de CPF, RG, telefone, CEP, datas  
+- Máscaras automáticas em tempo real  
+- Sistema de busca multifuncional  
+- Modal de visualização detalhada  
+- Modal de edição com todos os campos  
+- Dashboard com 4 gráficos interativos  
+- Estatísticas processadas no backend  
+- Sistema de encaminhamentos (33 organizações)  
+- Tipos de denúncia (10 opções)  
+- Persistência em banco SQLite  
+- API REST documentada (Swagger)  
+- Script de população automática  
+- Proxy de desenvolvimento configurado  
 
 ---
 
@@ -438,6 +438,6 @@ Exibe estrutura das tabelas e contagem de registros.
 ---
 
 **Última atualização:** 11 de dezembro de 2025  
-**Status:** ✅ Funcional - CRUD Completo + Dashboard + Validações + Estatísticas  
+**Status:** Funcional - CRUD Completo + Dashboard + Validações + Estatísticas  
 **Desenvolvedores:** Helmer Araújo, Kayck William, Victor de Souza e Weslley Santos
 **Repositório:** https://github.com/KayckWilliam/Projeto-TMI-22 
